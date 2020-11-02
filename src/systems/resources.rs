@@ -5,7 +5,7 @@ use crate::{Planet, ResourcesBoard};
 use amethyst::{
     core::Transform,
     derive::SystemDesc,
-    ecs::prelude::{Entity, Join, ReadExpect, System, SystemData, Write, WriteStorage},
+    ecs::prelude::{Entity, ReadExpect, System, SystemData, Write, WriteStorage},
     ui::UiText,
 };
 

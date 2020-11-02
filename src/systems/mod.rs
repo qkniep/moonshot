@@ -3,4 +3,4 @@
 
 mod resources;
 
-pub use self::resources::{ResourcesText, ResourcesSystem};
+pub use self::resources::{ResourcesSystem, ResourcesText};

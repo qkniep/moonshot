@@ -9,13 +9,11 @@ use amethyst::{
     renderer::{
         Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture, Transparent,
     },
-    ui::{
-        Anchor, LineMode, TtfFormat, UiButtonBuilder, UiImage, UiText,
-        UiTransform,
-    },
+    ui::{Anchor, LineMode, TtfFormat, UiImage, UiText, UiTransform},
     window::ScreenDimensions,
 };
 use amethyst_rendy::palette::Srgba;
+use log::debug;
 
 use crate::{systems::ResourcesText, Planet};
 
@@ -36,8 +34,33 @@ impl SimpleState for GameplayState {
 
         self.sprite_sheet_handle.replace(load_sprite_sheet(world));
         init_camera(world, &dimensions);
-        init_planet(world, self.sprite_sheet_handle.clone().unwrap(), &dimensions);
+        init_planet(
+            world,
+            self.sprite_sheet_handle.clone().unwrap(),
+            &dimensions,
+        );
         init_ui(world, self.sprite_sheet_handle.clone().unwrap());
+    }
+
+    fn handle_event(
+        &mut self,
+        _: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
+        match &event {
+            StateEvent::Window(event) => {
+                if is_close_requested(&event) {
+                    Trans::Quit
+                } else {
+                    Trans::None
+                }
+            }
+            StateEvent::Input(input) => {
+                debug!("Input Event detected: {:?}.", input);
+                Trans::None
+            }
+            _ => Trans::None
+        }
     }
 
     fn fixed_update(&mut self, _data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
@@ -93,7 +116,11 @@ fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
 }
 
 /// Creates a single planet without a moon.
-fn init_planet(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>, dimensions: &ScreenDimensions) {
+fn init_planet(
+    world: &mut World,
+    sprite_sheet_handle: Handle<SpriteSheet>,
+    dimensions: &ScreenDimensions,
+) {
     let mut local_transform = Transform::default();
     local_transform.set_translation_xyz(dimensions.width() / 2.0, dimensions.height() / 2.0, 0.0);
 
@@ -110,9 +137,11 @@ fn init_planet(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>, dime
 
 /// Creates the UI that shows the resources of the player.
 pub fn init_ui(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
-    let (r, g, b, a) = Srgba::new(37. / 255., 205. / 255., 227. / 255., 0.8).into_linear().into_components();
+    let (r, g, b, a) = Srgba::new(37. / 255., 205. / 255., 227. / 255., 0.8)
+        .into_linear()
+        .into_components();
     // this creates the simple gray background UI element.
-    let ui_background = world
+    world
         .create_entity()
         .with(UiImage::SolidColor([r, g, b, a]))
         .with(UiTransform::new(
@@ -131,9 +160,19 @@ pub fn init_ui(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
     // Assign the third sprite on the sprite sheet, as this is the minerals icon
     let sprite_render = SpriteRender::new(sprite_sheet_handle, 2);
 
-    world.create_entity()
+    world
+        .create_entity()
         .with(UiImage::Sprite(sprite_render))
-        .with(UiTransform::new("".to_string(), Anchor::TopLeft, Anchor::TopLeft, 35., -30., 1., 50., 50.))
+        .with(UiTransform::new(
+            "".to_string(),
+            Anchor::TopLeft,
+            Anchor::TopLeft,
+            35.,
+            -30.,
+            1.,
+            50.,
+            50.,
+        ))
         .with(Transparent)
         .build();
 
