@@ -6,6 +6,7 @@
 //! ...possibly also asteroids
 
 mod bundle;
+mod pause;
 mod state;
 mod systems;
 

@@ -15,7 +15,7 @@ use amethyst::{
 use amethyst_rendy::palette::Srgba;
 use log::debug;
 
-use crate::{systems::ResourcesText, Planet};
+use crate::{pause::PauseMenuState, systems::ResourcesText, Planet};
 
 #[derive(Default)]
 pub struct GameplayState {
@@ -51,6 +51,9 @@ impl SimpleState for GameplayState {
             StateEvent::Window(event) => {
                 if is_close_requested(&event) {
                     Trans::Quit
+                } else if is_key_down(&event, VirtualKeyCode::Escape) {
+                    log::info!("[Trans::Push] Pausing Game!");
+                    Trans::Push(Box::new(PauseMenuState::default()))
                 } else {
                     Trans::None
                 }
