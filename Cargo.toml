@@ -5,4 +5,5 @@ authors = ["Quentin Kniep <hello@quentinkniep.com>"]
 edition = "2018"
 
 [dependencies]
-amethyst = "0.15"
+amethyst = { version = "0.15", features = ["metal"] }
+amethyst_rendy = "0.15"
