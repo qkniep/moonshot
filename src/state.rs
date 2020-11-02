@@ -1,4 +1,4 @@
-// Copyright (C) 2020 qkniep <qkniep@qkmac>
+// Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
 use amethyst::{
@@ -16,6 +16,8 @@ use amethyst::{
     window::ScreenDimensions,
 };
 use amethyst_rendy::palette::Srgba;
+
+use crate::systems::ResourcesText;
 
 pub struct GameplayState;
 
@@ -35,7 +37,7 @@ impl SimpleState for GameplayState {
         let sprites = load_sprites(world);
         init_sprites(world, &sprites, &dimensions);
 
-        create_ui_example(world);
+        create_ui(world);
     }
 
     fn fixed_update(&mut self, _data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
@@ -127,9 +129,8 @@ fn init_sprites(world: &mut World, sprites: &[SpriteRender], dimensions: &Screen
     }
 }
 
-/// Creates a simple UI background and a UI text label
-/// This is the pure code only way to create UI with amethyst.
-pub fn create_ui_example(world: &mut World) {
+/// Creates the UI that shows the resources of the player.
+pub fn create_ui(world: &mut World) {
     let (r, g, b, a) = Srgba::new(37. / 255., 205. / 255., 227. / 255., 0.8).into_linear().into_components();
     // this creates the simple gray background UI element.
     let ui_background = world
@@ -159,7 +160,7 @@ pub fn create_ui_example(world: &mut World) {
 
     // This creates the actual label and places it on the screen.
     // Take note of the z position given, this ensures the label gets rendered above the background UI element.
-    world
+    let p_resources = world
         .create_entity()
         .with(UiTransform::new(
             "".to_string(),
@@ -180,6 +181,8 @@ pub fn create_ui_example(world: &mut World) {
             Anchor::TopLeft,
         ))
         .build();
+
+    world.insert(ResourcesText { p_red: p_resources });
 }
 
 #[cfg(test)]
