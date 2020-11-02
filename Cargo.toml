@@ -1,0 +1,8 @@
+[package]
+name = "moonshot"
+version = "0.1.0"
+authors = ["Quentin Kniep <hello@quentinkniep.com>"]
+edition = "2018"
+
+[dependencies]
+amethyst = "0.15"
