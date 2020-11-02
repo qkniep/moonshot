@@ -11,7 +11,7 @@ Container(
         width: 1920.0,
         height: 1080.0,
     ),
-    background: SolidColor(0.0, 0.0, 0.0, 0.5),
+    background: SolidColor(0.0, 0.0, 0.0, 0.75),
     children: [
         Button(
             transform: (
@@ -23,19 +23,19 @@ Container(
                 // but we also want to fully draw this button in front of the other elements as well.
                 z: 2.0,
 
-                width: 300.0,
-                height: 50.0,
+                width: 600.0,
+                height: 100.0,
                 anchor: Middle,
                 mouse_reactive: true,
             ),
             button: (
                 text: "Resume",
                 font: File("fonts/Nunito-Regular.ttf", ("TTF", ())),
-                font_size: 36.0,
-                normal_image: SolidColor(0.4, 0.4, 0.4, 1.),
-                hover_image: SolidColor(0.5, 0.5, 0.5, 1.),
+                font_size: 64.0,
+                normal_image: SolidColor(0.29798, 0.37302, 0.37804, 1.),
+                hover_image: SolidColor(0.21044, 0.26002, 0.26409, 1.0),
                 press_image: SolidColor(0.2, 0.2, 0.2, 1.),
-                normal_text_color: (0.2, 0.2, 0.2, 1.0),
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
                 hover_text_color: (0.7, 0.7, 0.7, 1.0),
                 press_text_color: (1.0, 1.0, 1.0, 1.0),
             )
@@ -46,19 +46,19 @@ Container(
                 x: 0.0,
                 y: -90.0,
                 z: 2.0,
-                width: 300.0,
-                height: 50.0,
+                width: 600.0,
+                height: 100.0,
                 anchor: Middle,
                 mouse_reactive: true,
             ),
             button: (
                 text: "Exit",
                 font: File("fonts/Nunito-Regular.ttf", ("TTF", ())),
-                font_size: 36.0,
-                normal_image: SolidColor(0.4, 0.4, 0.4, 1.),
-                hover_image: SolidColor(0.5, 0.5, 0.5, 1.),
+                font_size: 64.0,
+                normal_image: SolidColor(0.29798, 0.37302, 0.37804, 1.),
+                hover_image: SolidColor(0.21044, 0.26002, 0.26409, 1.0),
                 press_image: SolidColor(0.2, 0.2, 0.2, 1.),
-                normal_text_color: (0.2, 0.2, 0.2, 1.0),
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
                 hover_text_color: (0.7, 0.7, 0.7, 1.0),
                 press_text_color: (1.0, 1.0, 1.0, 1.0),
             )
