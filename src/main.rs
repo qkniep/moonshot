@@ -59,7 +59,7 @@ fn main() -> amethyst::Result<()> {
     )?;
 
     let assets_dir = app_root.join("assets");
-    let mut game = Application::build(assets_dir, state::GameplayState)?
+    let mut game = Application::build(assets_dir, state::GameplayState::default())?
         .with_frame_limit(
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
             144,
@@ -70,18 +70,14 @@ fn main() -> amethyst::Result<()> {
     Ok(())
 }
 
-pub struct Planet {
-    x: i32,
-    y: i32,
-}
+pub struct Planet;
 
 impl Component for Planet {
     type Storage = DenseVecStorage<Self>;
 }
 
 pub struct Moon {
-    x: i32,
-    y: i32,
+    velocity: f32,
 }
 
 impl Component for Moon {
