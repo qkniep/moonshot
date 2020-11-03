@@ -12,6 +12,7 @@ mod systems;
 use std::time::Duration;
 
 use amethyst::{
+    LoggerConfig, LogLevelFilter,
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     ecs::{Component, DenseVecStorage},
     input::{InputBundle, StringBindings},
@@ -28,7 +29,7 @@ use amethyst::{
 use crate::bundle::GameplayBundle;
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::start_logger(LoggerConfig { level_filter: LogLevelFilter::Debug, .. Default::default() });
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("config").join("display.ron");

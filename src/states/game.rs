@@ -14,7 +14,6 @@ use amethyst::{
     window::ScreenDimensions,
 };
 use amethyst_rendy::palette::Srgba;
-use log::debug;
 
 use crate::{states::pause::PauseMenuState, systems::ResourcesText, Moon, Planet};
 
@@ -27,10 +26,6 @@ pub struct GameplayState {
 impl SimpleState for GameplayState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-
-        // Get the screen dimensions so we can initialize the camera and
-        // place our sprites correctly later. We'll clone this since we'll
-        // pass the world mutably to the following functions.
         let dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
 
         self.sprite_sheet_handle.replace(load_sprite_sheet(world));
@@ -58,10 +53,6 @@ impl SimpleState for GameplayState {
                 } else {
                     Trans::None
                 }
-            }
-            StateEvent::Input(input) => {
-                debug!("Input Event detected: {:?}.", input);
-                Trans::None
             }
             _ => Trans::None,
         }

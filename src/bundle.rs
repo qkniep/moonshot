@@ -1,7 +1,7 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use crate::systems::{KeplerSystem, ResourcesSystem};
+use crate::systems::{CameraMovementSystem, KeplerSystem, ResourcesSystem};
 use amethyst::{
     core::bundle::SystemBundle,
     ecs::{DispatcherBuilder, World},
@@ -18,6 +18,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameplayBundle {
         _world: &mut World,
         builder: &mut DispatcherBuilder<'a, 'b>,
     ) -> Result<(), Error> {
+        builder.add(CameraMovementSystem, "camera_movement_system", &[]);
         builder.add(KeplerSystem, "kepler_system", &[]);
         builder.add(ResourcesSystem, "resources_system", &[]);
         Ok(())
