@@ -3,6 +3,7 @@
 
 use amethyst::{
     assets::{AssetStorage, Handle, Loader},
+    core::math::Vector3,
     core::transform::Transform,
     input::{get_key, is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
@@ -15,7 +16,7 @@ use amethyst::{
 use amethyst_rendy::palette::Srgba;
 use log::debug;
 
-use crate::{pause::PauseMenuState, systems::ResourcesText, Planet};
+use crate::{pause::PauseMenuState, systems::ResourcesText, Moon, Planet};
 
 #[derive(Default)]
 pub struct GameplayState {
@@ -128,13 +129,24 @@ fn init_planet(
     local_transform.set_translation_xyz(dimensions.width() / 2.0, dimensions.height() / 2.0, 0.0);
 
     // Assign the first sprite on the sprite sheet, as this is the planet
-    let sprite_render = SpriteRender::new(sprite_sheet_handle, 0);
+    let sprite_render = SpriteRender::new(sprite_sheet_handle.clone(), 0);
 
     world
         .create_entity()
         .with(sprite_render)
         .with(Planet)
-        .with(local_transform)
+        .with(local_transform.clone())
+        .build();
+
+    local_transform.set_translation_xyz(dimensions.width() / 2.0 + 500., dimensions.height() / 2.0, 0.0);
+    local_transform.set_scale(Vector3::new(0.25, 0.25, 0.25));
+    let moon_sprite = SpriteRender::new(sprite_sheet_handle, 1);
+
+    world
+        .create_entity()
+        .with(moon_sprite)
+        .with(Moon { velocity: 0.25 })
+        .with(local_transform.clone())
         .build();
 }
 
