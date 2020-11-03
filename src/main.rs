@@ -33,6 +33,7 @@ fn main() -> amethyst::Result<()> {
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("config").join("display.ron");
     let key_bindings_path = app_root.join("config").join("input.ron");
+    let assets_dir = app_root.join("assets");
 
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
@@ -51,7 +52,6 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default()),
         )?;
 
-    let assets_dir = app_root.join("assets");
     let mut game = Application::build(assets_dir, states::game::GameplayState::default())?
         .with_frame_limit(
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
@@ -74,6 +74,12 @@ pub struct Moon {
 }
 
 impl Component for Moon {
+    type Storage = DenseVecStorage<Self>;
+}
+
+pub struct Rocket;
+
+impl Component for Rocket {
     type Storage = DenseVecStorage<Self>;
 }
 
