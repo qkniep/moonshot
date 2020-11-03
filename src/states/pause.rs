@@ -3,10 +3,9 @@
 
 use amethyst::{
     ecs::Entity,
-    input::{get_key, is_close_requested, is_key_down, VirtualKeyCode},
+    input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
-    ui::{Anchor, LineMode, TtfFormat, UiCreator, UiEvent, UiEventType, UiFinder},
-    window::ScreenDimensions,
+    ui::{UiCreator, UiEvent, UiEventType, UiFinder},
 };
 use log::debug;
 
@@ -38,14 +37,14 @@ impl<'a> SimpleState for PauseMenuState {
         self.resume_button = None;
     }
 
-        fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, _data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Window(event) => {
                 if is_close_requested(&event) {
-                    log::info!("[Trans::Quit] Quitting Application!");
+                    debug!("[Trans::Quit] Quitting Application!");
                     Trans::Quit
                 } else if is_key_down(&event, VirtualKeyCode::Escape) {
-                    log::info!("[Trans::Pop] Closing Pause Menu!");
+                    debug!("[Trans::Pop] Closing Pause Menu!");
                     Trans::Pop
                 } else {
                     Trans::None
@@ -56,7 +55,7 @@ impl<'a> SimpleState for PauseMenuState {
                 target,
             }) => {
                 if Some(target) == self.resume_button {
-                    log::info!("Resuming Game!");
+                    debug!("Resuming Game!");
                     Trans::Pop
                 } else if Some(target) == self.exit_button {
                     Trans::Quit
@@ -70,9 +69,7 @@ impl<'a> SimpleState for PauseMenuState {
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
         // once deferred creation of the root ui entity finishes, look up buttons
-        if self.resume_button.is_none()
-            || self.exit_button.is_none()
-        {
+        if self.resume_button.is_none() || self.exit_button.is_none() {
             data.world.exec(|ui_finder: UiFinder<'_>| {
                 self.resume_button = ui_finder.find(RESUME_BUTTON_ID);
                 self.exit_button = ui_finder.find(EXIT_BUTTON_ID);

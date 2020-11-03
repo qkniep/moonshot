@@ -5,7 +5,7 @@ use amethyst::{
     assets::{AssetStorage, Handle, Loader},
     core::math::Vector3,
     core::transform::Transform,
-    input::{get_key, is_close_requested, is_key_down, VirtualKeyCode},
+    input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{
         Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture, Transparent,
@@ -63,7 +63,7 @@ impl SimpleState for GameplayState {
                 debug!("Input Event detected: {:?}.", input);
                 Trans::None
             }
-            _ => Trans::None
+            _ => Trans::None,
         }
     }
 
@@ -138,7 +138,6 @@ fn init_planet(
         .with(local_transform.clone())
         .build();
 
-    local_transform.set_translation_xyz(dimensions.width() / 2.0 + 500., dimensions.height() / 2.0, 0.0);
     local_transform.set_scale(Vector3::new(0.25, 0.25, 0.25));
     let moon_sprite = SpriteRender::new(sprite_sheet_handle, 1);
 
@@ -146,7 +145,7 @@ fn init_planet(
         .create_entity()
         .with(moon_sprite)
         .with(Moon { velocity: 0.25 })
-        .with(local_transform.clone())
+        .with(local_transform)
         .build();
 }
 

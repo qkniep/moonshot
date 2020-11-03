@@ -24,7 +24,6 @@ use amethyst::{
     ui::{RenderUi, UiBundle},
     utils::application_root_dir,
 };
-use amethyst_rendy::palette::Srgba;
 
 use crate::bundle::GameplayBundle;
 
@@ -35,10 +34,6 @@ fn main() -> amethyst::Result<()> {
     let display_config_path = app_root.join("config").join("display.ron");
     let key_bindings_path = app_root.join("config").join("input.ron");
 
-    let (r, g, b, a) = Srgba::new(0. / 255., 26. / 255., 68. / 255., 1.)
-        .into_linear()
-        .into_components();
-
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(
@@ -48,12 +43,11 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
-                // The RenderToWindow plugin provides all the scaffolding for opening a window and drawing on it
                 .with_plugin(
-                    RenderToWindow::from_config_path(display_config_path)?.with_clear([r, g, b, a]),
+                    RenderToWindow::from_config_path(display_config_path)?
+                        .with_clear([0.0, 0.01027, 0.05736, 1.0]),
                 )
                 .with_plugin(RenderUi::default())
-                // RenderFlat2D plugin is used to render entities with a `SpriteRender` component.
                 .with_plugin(RenderFlat2D::default()),
         )?;
 
