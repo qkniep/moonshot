@@ -6,8 +6,7 @@
 //! ...possibly also asteroids
 
 mod bundle;
-mod pause;
-mod state;
+mod states;
 mod systems;
 
 use std::time::Duration;
@@ -59,7 +58,7 @@ fn main() -> amethyst::Result<()> {
         )?;
 
     let assets_dir = app_root.join("assets");
-    let mut game = Application::build(assets_dir, state::GameplayState::default())?
+    let mut game = Application::build(assets_dir, states::game::GameplayState::default())?
         .with_frame_limit(
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
             144,

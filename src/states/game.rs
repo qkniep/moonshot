@@ -16,7 +16,7 @@ use amethyst::{
 use amethyst_rendy::palette::Srgba;
 use log::debug;
 
-use crate::{pause::PauseMenuState, systems::ResourcesText, Moon, Planet};
+use crate::{states::pause::PauseMenuState, systems::ResourcesText, Moon, Planet};
 
 #[derive(Default)]
 pub struct GameplayState {
