@@ -40,14 +40,7 @@ impl<'s> System<'s> for CombatSystem {
 
     fn run(
         &mut self,
-        (
-            entities,
-            planets,
-            rockets,
-            sprite_resource,
-            lazy_update,
-            event_channel,
-        ): Self::SystemData,
+        (entities, planets, rockets, sprite_resource, lazy_update, event_channel): Self::SystemData,
     ) {
         for event in event_channel.read(self.event_reader.as_mut().unwrap()) {
             if planets.get(event.entity).is_some() {

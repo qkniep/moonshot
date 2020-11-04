@@ -28,13 +28,7 @@ impl<'s> System<'s> for BuildingSystem {
         );
     }
 
-    fn run(
-        &mut self,
-        (
-            mut moons,
-            event_channel,
-        ): Self::SystemData,
-    ) {
+    fn run(&mut self, (mut moons, event_channel): Self::SystemData) {
         for event in event_channel.read(self.event_reader.as_mut().unwrap()) {
             if let Some(moon) = moons.get_mut(event.entity) {
                 moon.mining = !moon.mining;

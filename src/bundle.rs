@@ -1,7 +1,10 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use crate::systems::{BuildingSystem, CameraMovementSystem, CombatSystem, KeplerSystem, MouseInteractionSystem, ResourcesSystem};
+use crate::systems::{
+    BuildingSystem, CameraMovementSystem, CombatSystem, KeplerSystem, MouseInteractionSystem,
+    ResourcesSystem,
+};
 use amethyst::{
     core::bundle::SystemBundle,
     ecs::{DispatcherBuilder, World},
@@ -22,8 +25,16 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameplayBundle {
         builder.add(KeplerSystem, "kepler_system", &[]);
         builder.add(ResourcesSystem, "resources_system", &[]);
         builder.add(MouseInteractionSystem, "mouse_interaction_system", &[]);
-        builder.add(BuildingSystem::default(), "building_system", &["mouse_interaction_system"]);
-        builder.add(CombatSystem::default(), "combat_system", &["mouse_interaction_system"]);
+        builder.add(
+            BuildingSystem::default(),
+            "building_system",
+            &["mouse_interaction_system"],
+        );
+        builder.add(
+            CombatSystem::default(),
+            "combat_system",
+            &["mouse_interaction_system"],
+        );
         Ok(())
     }
 }
