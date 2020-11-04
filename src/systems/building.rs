@@ -3,7 +3,11 @@
 
 use amethyst::{
     assets::AssetStorage,
-    core::{geometry::Plane, math::{Point2, Vector2}, Transform},
+    core::{
+        geometry::Plane,
+        math::{Point2, Vector2},
+        Transform,
+    },
     ecs::*,
     input::{InputHandler, StringBindings},
     renderer::{
@@ -32,7 +36,20 @@ impl<'s> System<'s> for BuildingSystem {
         Read<'s, InputHandler<StringBindings>>,
     );
 
-    fn run(&mut self, (entities, mut moons, transforms, cameras, sprites, sprite_sheets, screen_dimensions, active_camera, input): Self::SystemData) {
+    fn run(
+        &mut self,
+        (
+            entities,
+            mut moons,
+            transforms,
+            cameras,
+            sprites,
+            sprite_sheets,
+            screen_dimensions,
+            active_camera,
+            input,
+        ): Self::SystemData,
+    ) {
         if !input.mouse_button_is_down(MouseButton::Left) {
             return;
         }

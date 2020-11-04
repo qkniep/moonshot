@@ -1,12 +1,7 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use amethyst::{
-    core::Transform,
-    derive::SystemDesc,
-    ecs::prelude::*,
-    ui::UiText,
-};
+use amethyst::{core::Transform, derive::SystemDesc, ecs::prelude::*, ui::UiText};
 
 use crate::{Moon, Planet, ResourcesBoard};
 

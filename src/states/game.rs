@@ -135,7 +135,10 @@ fn init_planet(
     world
         .create_entity()
         .with(moon_sprite)
-        .with(Moon { velocity: 0.25, mining: false })
+        .with(Moon {
+            velocity: 0.25,
+            mining: false,
+        })
         .with(local_transform)
         .build();
 }
