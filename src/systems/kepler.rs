@@ -1,12 +1,13 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use crate::Moon;
 use amethyst::{
     core::{Time, Transform},
     derive::SystemDesc,
     ecs::prelude::{Join, Read, System, SystemData, WriteStorage},
 };
+
+use crate::Moon;
 
 /// This system is responsible for moving moons around their planets.
 #[derive(SystemDesc)]

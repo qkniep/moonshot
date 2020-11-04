@@ -21,7 +21,7 @@ impl<'s> System<'s> for CameraMovementSystem {
 
     fn run(&mut self, (cameras, mut transforms, input_handler, time): Self::SystemData) {
         let delta_time = time.delta_real_seconds();
-        let move_factor = 128.0 * delta_time;
+        let move_factor = 512.0 * delta_time;
         for (_, transform) in (&cameras, &mut transforms).join() {
             if input_handler.action_is_down("CameraMoveUp").unwrap() {
                 transform.move_up(move_factor);

@@ -72,6 +72,7 @@ impl Component for Planet {
 
 pub struct Moon {
     velocity: f32,
+    mining: bool,
 }
 
 impl Component for Moon {

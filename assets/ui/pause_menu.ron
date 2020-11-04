@@ -18,9 +18,6 @@ Container(
                 id: "resume",
                 x: 0.0,
                 y: 30.0,
-
-                // because of the container, the button will react `before' the elements below it,
-                // but we also want to fully draw this button in front of the other elements as well.
                 z: 2.0,
 
                 width: 600.0,

@@ -1,13 +1,14 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use crate::{Planet, ResourcesBoard};
 use amethyst::{
     core::Transform,
     derive::SystemDesc,
-    ecs::prelude::{Entity, Join, ReadExpect, System, SystemData, Write, WriteStorage},
+    ecs::prelude::*,
     ui::UiText,
 };
+
+use crate::{Moon, Planet, ResourcesBoard};
 
 /// This system is responsible for counting the resources harvested by the player
 #[derive(SystemDesc)]
@@ -15,8 +16,9 @@ pub struct ResourcesSystem;
 
 impl<'s> System<'s> for ResourcesSystem {
     type SystemData = (
-        WriteStorage<'s, Planet>,
-        WriteStorage<'s, Transform>,
+        ReadStorage<'s, Moon>,
+        ReadStorage<'s, Planet>,
+        ReadStorage<'s, Transform>,
         WriteStorage<'s, UiText>,
         Write<'s, ResourcesBoard>,
         ReadExpect<'s, ResourcesText>,
@@ -25,14 +27,18 @@ impl<'s> System<'s> for ResourcesSystem {
     fn run(
         &mut self,
         (
-            mut planets,
-            mut transforms,
+            moons,
+            planets,
+            transforms,
             mut text,
             mut resources_board,
             resources_text,
         ): Self::SystemData,
     ) {
-        for (_planet, _transform) in (&mut planets, &mut transforms).join() {
+        for (moon, _) in (&moons, &transforms).join() {
+            if !moon.mining {
+                continue;
+            }
             resources_board.red = (resources_board.red + 1).min(512);
             if let Some(text) = text.get_mut(resources_text.p_red) {
                 text.text = resources_board.red.to_string();
