@@ -6,6 +6,7 @@
 //! ...possibly also asteroids
 
 mod bundle;
+mod sprites;
 mod states;
 mod systems;
 

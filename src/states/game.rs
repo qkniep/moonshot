@@ -15,12 +15,13 @@ use amethyst::{
 };
 use amethyst_rendy::palette::Srgba;
 
-use crate::{states::pause::PauseMenuState, systems::ResourcesText, Moon, Planet};
+use crate::{
+    sprites::init_sprite_resource, states::pause::PauseMenuState, systems::ResourcesText, Moon,
+    Planet,
+};
 
 #[derive(Default)]
-pub struct GameplayState {
-    sprite_sheet_handle: Option<Handle<SpriteSheet>>,
-}
+pub struct GameplayState;
 
 /// Contains the main state with the game logic.
 impl SimpleState for GameplayState {
@@ -28,14 +29,11 @@ impl SimpleState for GameplayState {
         let world = data.world;
         let dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
 
-        self.sprite_sheet_handle.replace(load_sprite_sheet(world));
+        let sprite_sheet_handle = load_sprite_sheet(world);
         init_camera(world, &dimensions);
-        init_planet(
-            world,
-            self.sprite_sheet_handle.clone().unwrap(),
-            &dimensions,
-        );
-        init_ui(world, self.sprite_sheet_handle.clone().unwrap());
+        init_planet(world, sprite_sheet_handle.clone(), &dimensions);
+        init_ui(world, sprite_sheet_handle.clone());
+        init_sprite_resource(world, sprite_sheet_handle);
     }
 
     fn handle_event(
@@ -144,7 +142,7 @@ fn init_planet(
 }
 
 /// Creates the UI that shows the resources of the player.
-pub fn init_ui(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
+fn init_ui(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
     let (r, g, b, a) = Srgba::new(37. / 255., 205. / 255., 227. / 255., 0.8)
         .into_linear()
         .into_components();
