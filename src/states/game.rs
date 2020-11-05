@@ -4,7 +4,7 @@
 use amethyst::{
     assets::{AssetStorage, Handle, Loader},
     core::math::Vector3,
-    core::transform::Transform,
+    core::transform::{components::Parent, Transform},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{
@@ -120,10 +120,26 @@ fn init_planet(
     // Assign the first sprite on the sprite sheet, as this is the planet
     let sprite_render = SpriteRender::new(sprite_sheet_handle.clone(), 0);
 
-    world
+    let planet = world
         .create_entity()
         .with(sprite_render)
-        .with(Planet)
+        .with(Planet { scale: 0.5 })
+        .with(local_transform.clone())
+        .build();
+
+    local_transform.set_scale(Vector3::new(0.25, 0.25, 0.25));
+    let moon_sprite = SpriteRender::new(sprite_sheet_handle.clone(), 1);
+
+    world
+        .create_entity()
+        .with(moon_sprite)
+        .with(Moon {
+            scale: 0.25,
+            velocity: 0.25,
+            mining: false,
+            orbit_radius: 350.0,
+        })
+        .with(Parent { entity: planet })
         .with(local_transform.clone())
         .build();
 
@@ -134,9 +150,12 @@ fn init_planet(
         .create_entity()
         .with(moon_sprite)
         .with(Moon {
-            velocity: 0.25,
+            scale: 0.25,
+            velocity: 0.5,
             mining: false,
+            orbit_radius: 500.0,
         })
+        .with(Parent { entity: planet })
         .with(local_transform)
         .build();
 }

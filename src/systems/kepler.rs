@@ -23,8 +23,9 @@ impl<'s> System<'s> for KeplerSystem {
     fn run(&mut self, (mut moons, mut transforms, time): Self::SystemData) {
         for (moon, transform) in (&mut moons, &mut transforms).join() {
             let t = time.absolute_time_seconds();
-            transform.set_translation_x(1200. + 500. * (moon.velocity as f64 * t).cos() as f32);
-            transform.set_translation_y(675. + 500. * (moon.velocity as f64 * t).sin() as f32);
+            let ds = moon.velocity as f64 * t;
+            transform.set_translation_x(moon.orbit_radius * ds.cos() as f32);
+            transform.set_translation_y(moon.orbit_radius * ds.sin() as f32);
         }
     }
 }

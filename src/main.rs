@@ -68,15 +68,19 @@ fn main() -> amethyst::Result<()> {
     Ok(())
 }
 
-pub struct Planet;
+pub struct Planet {
+    scale: f32,
+}
 
 impl Component for Planet {
     type Storage = DenseVecStorage<Self>;
 }
 
 pub struct Moon {
+    scale: f32,
     velocity: f32,
     mining: bool,
+    orbit_radius: f32,
 }
 
 impl Component for Moon {
