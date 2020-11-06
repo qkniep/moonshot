@@ -13,8 +13,10 @@ mod systems;
 use std::time::Duration;
 
 use amethyst::{
+    assets::{PrefabData, PrefabLoaderSystemDesc},
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
-    ecs::{Component, DenseVecStorage},
+    derive::PrefabData,
+    ecs::{Component, DenseVecStorage, Entity, WriteStorage,},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
@@ -24,10 +26,11 @@ use amethyst::{
     },
     ui::{RenderUi, UiBundle},
     utils::application_root_dir,
-    LogLevelFilter, LoggerConfig,
+    Error, LogLevelFilter, LoggerConfig,
 };
+use serde::{Deserialize, Serialize};
 
-use crate::bundle::GameplayBundle;
+use crate::{bundle::GameplayBundle, states::game::MyPrefabData};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(LoggerConfig {
@@ -41,6 +44,11 @@ fn main() -> amethyst::Result<()> {
     let assets_dir = app_root.join("assets");
 
     let game_data = GameDataBuilder::default()
+        .with_system_desc(
+            PrefabLoaderSystemDesc::<MyPrefabData>::default(),
+            "map_loader",
+            &[],
+        )
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             InputBundle::<StringBindings>::new().with_bindings_from_file(&key_bindings_path)?,
@@ -68,6 +76,8 @@ fn main() -> amethyst::Result<()> {
     Ok(())
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PrefabData)]
+#[prefab(Component)]
 pub struct Planet {
     scale: f32,
 }
@@ -76,6 +86,8 @@ impl Component for Planet {
     type Storage = DenseVecStorage<Self>;
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PrefabData)]
+#[prefab(Component)]
 pub struct Moon {
     scale: f32,
     velocity: f32,
@@ -87,6 +99,8 @@ impl Component for Moon {
     type Storage = DenseVecStorage<Self>;
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PrefabData)]
+#[prefab(Component)]
 pub struct Rocket;
 
 impl Component for Rocket {

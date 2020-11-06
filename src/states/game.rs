@@ -2,26 +2,40 @@
 // Distributed under terms of the MIT license.
 
 use amethyst::{
-    assets::{AssetStorage, Handle, Loader},
+    assets::{AssetStorage, Handle, Loader, PrefabData, PrefabLoader, ProgressCounter, RonFormat},
     core::math::Vector3,
     core::transform::{components::Parent, Transform},
+    derive::PrefabData,
+    ecs::Entity,
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{
+        sprite::prefab::SpriteScenePrefab,
         Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture, Transparent,
     },
     ui::{Anchor, LineMode, TtfFormat, UiImage, UiText, UiTransform},
     window::ScreenDimensions,
+    Error,
 };
 use amethyst_rendy::palette::Srgba;
+use serde::Deserialize;
 
 use crate::{
-    sprites::init_sprite_resource, states::pause::PauseMenuState, systems::ResourcesText, Moon,
-    Planet,
+    sprites::init_sprite_resource, states::pause::PauseMenuState, systems::ResourcesText,
+    Moon, Planet,
 };
 
+#[derive(Debug, Clone, Deserialize, PrefabData)]
+pub struct MyPrefabData {
+    sprite_scene: SpriteScenePrefab,
+    moon_data: Option<Moon>,
+    planet_data: Option<Planet>,
+}
+
 #[derive(Default)]
-pub struct GameplayState;
+pub struct GameplayState {
+    pub progress_counter: ProgressCounter,
+}
 
 /// Contains the main state with the game logic.
 impl SimpleState for GameplayState {
@@ -31,7 +45,17 @@ impl SimpleState for GameplayState {
 
         let sprite_sheet_handle = load_sprite_sheet(world);
         init_camera(world, &dimensions);
-        init_planet(world, sprite_sheet_handle.clone(), &dimensions);
+        //init_planet(world, sprite_sheet_handle.clone(), &dimensions);
+
+        let map_prefab = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+            loader.load(
+                "maps/default.ron",
+                RonFormat,
+                &mut self.progress_counter,
+            )
+        });
+        world.create_entity().with(map_prefab).build();
+
         init_ui(world, sprite_sheet_handle.clone());
         init_sprite_resource(world, sprite_sheet_handle);
     }
@@ -116,6 +140,7 @@ fn init_planet(
 ) {
     let mut local_transform = Transform::default();
     local_transform.set_translation_xyz(dimensions.width() / 2.0, dimensions.height() / 2.0, 0.0);
+    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
 
     // Assign the first sprite on the sprite sheet, as this is the planet
     let sprite_render = SpriteRender::new(sprite_sheet_handle.clone(), 0);
@@ -127,7 +152,7 @@ fn init_planet(
         .with(local_transform.clone())
         .build();
 
-    local_transform.set_scale(Vector3::new(0.25, 0.25, 0.25));
+    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
     let moon_sprite = SpriteRender::new(sprite_sheet_handle.clone(), 1);
 
     world
@@ -143,7 +168,7 @@ fn init_planet(
         .with(local_transform.clone())
         .build();
 
-    local_transform.set_scale(Vector3::new(0.25, 0.25, 0.25));
+    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
     let moon_sprite = SpriteRender::new(sprite_sheet_handle, 1);
 
     world

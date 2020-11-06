@@ -2012,6 +2012,7 @@ dependencies = [
  "amethyst",
  "amethyst_rendy",
  "log",
+ "serde",
 ]
 
 [[package]]
