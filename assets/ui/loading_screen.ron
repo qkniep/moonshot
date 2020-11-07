@@ -7,7 +7,7 @@ Container(
         width: 1920.0,
         height: 1080.0,
     ),
-    background: SolidColor(0.02501, 0.0478, 0.07958, 1.0),
+    background: SolidColor(0.01, 0.01, 0.01, 1.0),
     children: [
         Label(
             transform: (
