@@ -29,6 +29,7 @@ pub struct MyPrefabData {
 pub struct LoadingState {
     root: Option<Entity>,
     loading_progress: ProgressCounter,
+    loading_started: bool,
 }
 
 /// Contains the main state with the game logic.
@@ -37,15 +38,9 @@ impl<'a> SimpleState for LoadingState {
         let world = data.world;
 
         self.root = Some(
-            world.exec(|mut creator: UiCreator<'_>| creator.create("ui/loading_screen.ron", ())),
+            world.exec(|mut creator: UiCreator<'_>| creator.create("ui/loading_screen.ron",
+                    &mut self.loading_progress)),
         );
-
-        let sprite_sheet_handle = load_sprite_sheet(world, &mut self.loading_progress);
-        let map_prefab = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("maps/default.ron", RonFormat, &mut self.loading_progress)
-        });
-        world.create_entity().with(map_prefab).build();
-        init_sprite_resource(world, sprite_sheet_handle);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
@@ -56,8 +51,18 @@ impl<'a> SimpleState for LoadingState {
         }
     }
 
-    fn update(&mut self, _data: &mut StateData<GameData>) -> SimpleTrans {
-        if self.loading_progress.is_complete() {
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
+        if !self.loading_started {
+            let world = &mut data.world;
+            self.loading_started = true;
+            let sprite_sheet_handle = load_sprite_sheet(world, &mut self.loading_progress);
+            let map_prefab = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+                loader.load("maps/default.ron", RonFormat, &mut self.loading_progress)
+            });
+            world.create_entity().with(map_prefab).build();
+            init_sprite_resource(world, sprite_sheet_handle);
+            Trans::None
+        } else if self.loading_progress.is_complete() {
             Trans::Switch(Box::new(GameplayState::default()))
         } else {
             Trans::None
