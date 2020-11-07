@@ -12,9 +12,7 @@ use amethyst::{
 };
 use amethyst_rendy::palette::Srgba;
 
-use crate::{
-    sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText,
-};
+use crate::{sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText};
 
 #[derive(Default)]
 pub struct GameplayState;

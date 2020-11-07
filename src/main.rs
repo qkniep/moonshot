@@ -16,7 +16,7 @@ use amethyst::{
     assets::{PrefabData, PrefabLoaderSystemDesc},
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     derive::PrefabData,
-    ecs::{Component, DenseVecStorage, Entity, WriteStorage,},
+    ecs::{Component, DenseVecStorage, Entity, WriteStorage},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
