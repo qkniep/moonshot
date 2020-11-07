@@ -30,7 +30,7 @@ use amethyst::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{bundle::GameplayBundle, states::loading::MyPrefabData};
+use crate::states::loading::{LoadingState, MyPrefabData};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(LoggerConfig {
@@ -53,7 +53,6 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(
             InputBundle::<StringBindings>::new().with_bindings_from_file(&key_bindings_path)?,
         )?
-        //.with_bundle(GameplayBundle)?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
@@ -65,7 +64,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default()),
         )?;
 
-    let mut game = Application::build(assets_dir, states::loading::LoadingState::default())?
+    let mut game = Application::build(assets_dir, LoadingState::default())?
         .with_frame_limit(
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
             144,

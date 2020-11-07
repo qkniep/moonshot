@@ -3,7 +3,8 @@
 
 use amethyst::{
     assets::{Handle, Loader},
-    core::transform::Transform,
+    core::{bundle::SystemBundle, transform::Transform, ArcThreadPool},
+    ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{Camera, SpriteRender, SpriteSheet, Transparent},
@@ -12,21 +13,38 @@ use amethyst::{
 };
 use amethyst_rendy::palette::Srgba;
 
-use crate::{sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText};
+use crate::{
+    bundle::GameplayBundle, sprites::SpriteResource, states::pause::PauseMenuState,
+    systems::ResourcesText,
+};
 
 #[derive(Default)]
-pub struct GameplayState;
+pub struct GameplayState<'a, 'b> {
+    dispatcher: Option<Dispatcher<'a, 'b>>,
+}
 
 /// Contains the main state with the game logic.
-impl SimpleState for GameplayState {
+impl<'a, 'b> SimpleState for GameplayState<'a, 'b> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let world = data.world;
+        let mut world = data.world;
         let dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
 
         init_camera(world, &dimensions);
 
         let sprite_sheet_handle = world.read_resource::<SpriteResource>().sprite_sheet.clone();
         init_ui(world, sprite_sheet_handle);
+
+        let mut dispatcher_builder = DispatcherBuilder::new();
+        GameplayBundle::default()
+            .build(&mut world, &mut dispatcher_builder)
+            .expect("Failed to initialize GamplayBundle");
+
+        let mut dispatcher = dispatcher_builder
+            .with_pool((*world.read_resource::<ArcThreadPool>()).clone())
+            .build();
+        dispatcher.setup(world);
+
+        self.dispatcher = Some(dispatcher);
     }
 
     fn handle_event(
@@ -49,8 +67,12 @@ impl SimpleState for GameplayState {
         }
     }
 
-    fn fixed_update(&mut self, _data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        SimpleTrans::None
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
+        if let Some(dispatcher) = self.dispatcher.as_mut() {
+            dispatcher.dispatch(&data.world);
+        }
+
+        Trans::None
     }
 }
 

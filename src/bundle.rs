@@ -13,6 +13,7 @@ use amethyst::{
 
 /// A bundle is a convenient way to initialise related resources, components and systems in a
 /// world. This bundle prepares the main systems for gameplay.
+#[derive(Default)]
 pub struct GameplayBundle;
 
 impl<'a, 'b> SystemBundle<'a, 'b> for GameplayBundle {
