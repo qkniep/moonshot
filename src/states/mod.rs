@@ -2,4 +2,5 @@
 // Distributed under terms of the MIT license.
 
 pub mod game;
+pub mod loading;
 pub mod pause;

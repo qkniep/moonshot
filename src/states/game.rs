@@ -2,16 +2,15 @@
 // Distributed under terms of the MIT license.
 
 use amethyst::{
-    assets::{AssetStorage, Handle, Loader, PrefabData, PrefabLoader, ProgressCounter, RonFormat},
-    core::math::Vector3,
-    core::transform::{components::Parent, Transform},
+    assets::{AssetStorage, Handle, Loader, PrefabData, ProgressCounter},
+    core::transform::Transform,
     derive::PrefabData,
     ecs::Entity,
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{
-        sprite::prefab::SpriteScenePrefab,
-        Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture, Transparent,
+        sprite::prefab::SpriteScenePrefab, Camera, ImageFormat, SpriteRender, SpriteSheet,
+        SpriteSheetFormat, Texture, Transparent,
     },
     ui::{Anchor, LineMode, TtfFormat, UiImage, UiText, UiTransform},
     window::ScreenDimensions,
@@ -21,8 +20,8 @@ use amethyst_rendy::palette::Srgba;
 use serde::Deserialize;
 
 use crate::{
-    sprites::init_sprite_resource, states::pause::PauseMenuState, systems::ResourcesText,
-    Moon, Planet,
+    sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText, Moon,
+    Planet,
 };
 
 #[derive(Debug, Clone, Deserialize, PrefabData)]
@@ -43,21 +42,10 @@ impl SimpleState for GameplayState {
         let world = data.world;
         let dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
 
-        let sprite_sheet_handle = load_sprite_sheet(world);
         init_camera(world, &dimensions);
-        //init_planet(world, sprite_sheet_handle.clone(), &dimensions);
 
-        let map_prefab = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load(
-                "maps/default.ron",
-                RonFormat,
-                &mut self.progress_counter,
-            )
-        });
-        world.create_entity().with(map_prefab).build();
-
-        init_ui(world, sprite_sheet_handle.clone());
-        init_sprite_resource(world, sprite_sheet_handle);
+        let sprite_sheet_handle = world.read_resource::<SpriteResource>().sprite_sheet.clone();
+        init_ui(world, sprite_sheet_handle);
     }
 
     fn handle_event(
@@ -97,91 +85,6 @@ fn init_camera(world: &mut World, dimensions: &ScreenDimensions) {
         .create_entity()
         .with(Camera::standard_2d(dimensions.width(), dimensions.height()))
         .with(transform)
-        .build();
-}
-
-/// Loads and splits the `sprites.png` image asset into 3 sprites,
-/// which will then be assigned to entities for rendering them.
-///
-/// The provided `world` is used to retrieve the resource loader.
-fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
-    // Load the texture for our sprites. We'll later need to
-    // add a handle to this texture to our `SpriteRender`s, so
-    // we need to keep a reference to it.
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-            "sprites/planets.png",
-            ImageFormat::default(),
-            (),
-            &texture_storage,
-        )
-    };
-
-    // Load the spritesheet definition file, which contains metadata on our
-    // spritesheet texture.
-    let loader = world.read_resource::<Loader>();
-    let sheet_storage = world.read_resource::<AssetStorage<SpriteSheet>>();
-
-    loader.load(
-        "sprites/planets.ron",
-        SpriteSheetFormat(texture_handle),
-        (),
-        &sheet_storage,
-    )
-}
-
-/// Creates a single planet without a moon.
-fn init_planet(
-    world: &mut World,
-    sprite_sheet_handle: Handle<SpriteSheet>,
-    dimensions: &ScreenDimensions,
-) {
-    let mut local_transform = Transform::default();
-    local_transform.set_translation_xyz(dimensions.width() / 2.0, dimensions.height() / 2.0, 0.0);
-    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
-
-    // Assign the first sprite on the sprite sheet, as this is the planet
-    let sprite_render = SpriteRender::new(sprite_sheet_handle.clone(), 0);
-
-    let planet = world
-        .create_entity()
-        .with(sprite_render)
-        .with(Planet { scale: 0.5 })
-        .with(local_transform.clone())
-        .build();
-
-    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
-    let moon_sprite = SpriteRender::new(sprite_sheet_handle.clone(), 1);
-
-    world
-        .create_entity()
-        .with(moon_sprite)
-        .with(Moon {
-            scale: 0.25,
-            velocity: 0.25,
-            mining: false,
-            orbit_radius: 350.0,
-        })
-        .with(Parent { entity: planet })
-        .with(local_transform.clone())
-        .build();
-
-    local_transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
-    let moon_sprite = SpriteRender::new(sprite_sheet_handle, 1);
-
-    world
-        .create_entity()
-        .with(moon_sprite)
-        .with(Moon {
-            scale: 0.25,
-            velocity: 0.5,
-            mining: false,
-            orbit_radius: 500.0,
-        })
-        .with(Parent { entity: planet })
-        .with(local_transform)
         .build();
 }
 

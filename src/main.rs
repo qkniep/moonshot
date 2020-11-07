@@ -30,7 +30,7 @@ use amethyst::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{bundle::GameplayBundle, states::game::MyPrefabData};
+use crate::{bundle::GameplayBundle, states::loading::MyPrefabData};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(LoggerConfig {
@@ -49,11 +49,16 @@ fn main() -> amethyst::Result<()> {
             "map_loader",
             &[],
         )
+        .with_system_desc(
+            PrefabLoaderSystemDesc::<crate::states::game::MyPrefabData>::default(),
+            "map_loader_old",
+            &[],
+        )
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             InputBundle::<StringBindings>::new().with_bindings_from_file(&key_bindings_path)?,
         )?
-        .with_bundle(GameplayBundle)?
+        //.with_bundle(GameplayBundle)?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
@@ -65,7 +70,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default()),
         )?;
 
-    let mut game = Application::build(assets_dir, states::game::GameplayState::default())?
+    let mut game = Application::build(assets_dir, states::loading::LoadingState::default())?
         .with_frame_limit(
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
             144,
