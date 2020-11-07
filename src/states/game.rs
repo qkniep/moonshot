@@ -2,39 +2,22 @@
 // Distributed under terms of the MIT license.
 
 use amethyst::{
-    assets::{AssetStorage, Handle, Loader, PrefabData, ProgressCounter},
+    assets::{Handle, Loader},
     core::transform::Transform,
-    derive::PrefabData,
-    ecs::Entity,
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
-    renderer::{
-        sprite::prefab::SpriteScenePrefab, Camera, ImageFormat, SpriteRender, SpriteSheet,
-        SpriteSheetFormat, Texture, Transparent,
-    },
+    renderer::{Camera, SpriteRender, SpriteSheet, Transparent},
     ui::{Anchor, LineMode, TtfFormat, UiImage, UiText, UiTransform},
     window::ScreenDimensions,
-    Error,
 };
 use amethyst_rendy::palette::Srgba;
-use serde::Deserialize;
 
 use crate::{
-    sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText, Moon,
-    Planet,
+    sprites::SpriteResource, states::pause::PauseMenuState, systems::ResourcesText,
 };
 
-#[derive(Debug, Clone, Deserialize, PrefabData)]
-pub struct MyPrefabData {
-    sprite_scene: SpriteScenePrefab,
-    moon_data: Option<Moon>,
-    planet_data: Option<Planet>,
-}
-
 #[derive(Default)]
-pub struct GameplayState {
-    pub progress_counter: ProgressCounter,
-}
+pub struct GameplayState;
 
 /// Contains the main state with the game logic.
 impl SimpleState for GameplayState {

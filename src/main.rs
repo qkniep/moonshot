@@ -49,11 +49,6 @@ fn main() -> amethyst::Result<()> {
             "map_loader",
             &[],
         )
-        .with_system_desc(
-            PrefabLoaderSystemDesc::<crate::states::game::MyPrefabData>::default(),
-            "map_loader_old",
-            &[],
-        )
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             InputBundle::<StringBindings>::new().with_bindings_from_file(&key_bindings_path)?,
