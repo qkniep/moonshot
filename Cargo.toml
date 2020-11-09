@@ -5,7 +5,4 @@ authors = ["Quentin Kniep <hello@quentinkniep.com>"]
 edition = "2018"
 
 [dependencies]
-amethyst = { version = "0.15", features = ["metal"] }
-amethyst_rendy = "0.15"
-log = "0.4"
-serde = "1"
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "213ba9629a27084f40e1d1cefab49d2819cf1f0b" }
