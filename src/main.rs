@@ -159,7 +159,7 @@ fn building(commands: &mut Commands,
     texture_atlases: Res<Assets<TextureAtlas>>,
     camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
 ) {
-    for event in state.curosr_event_reader.iter(&cursor_inputs) {
+    for event in state.cursor_event_reader.iter(&cursor_inputs) {
         state.cursor_position = event.position;
     }
 
@@ -202,7 +202,7 @@ fn building(commands: &mut Commands,
 #[derive(Default)]
 struct EventState {
     keyboard_event_reader: EventReader<KeyboardInput>,
-    curosr_event_reader: EventReader<CursorMoved>,
+    cursor_event_reader: EventReader<CursorMoved>,
     cursor_position: Vec2,
 }
 
@@ -219,7 +219,7 @@ fn combat(
 ) {
     let window = windows.get_primary().unwrap();
 
-    for event in state.curosr_event_reader.iter(&cursor_inputs) {
+    for event in state.cursor_event_reader.iter(&cursor_inputs) {
         state.cursor_position =
             event.position - Vec2::new(window.width() as f32 / 2.0, window.height() as f32 / 2.0);
     }
