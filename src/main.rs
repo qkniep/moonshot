@@ -26,7 +26,6 @@ struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        //app.add_resource(ClearColor(Color::hex("1A237E").unwrap()))
         app.add_resource(ClearColor(Color::hex("22265A").unwrap()))
             .add_resource(PlayerResources { pink: 0, green: 0 })
             .add_startup_system(game_setup.system())
@@ -161,6 +160,7 @@ struct BuildingState {
     keyboard_event_reader: EventReader<KeyboardInput>,
     cursor_event_reader: EventReader<CursorMoved>,
     cursor_position: Vec2,
+    cursor_follower: Option<Entity>,
     currently_building: bool,
 }
 
@@ -169,9 +169,11 @@ struct CursorFollowing;
 fn building(commands: &mut Commands,
     mut state: Local<BuildingState>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
+    mouse_input: Res<Input<MouseButton>>,
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
+    mut moon_query: Query<(&Moon, Mut<TextureAtlasSprite>, &Transform)>,
     mut sprite_query: Query<(&CursorFollowing, Mut<Transform>)>,
 ) {
     for event in state.cursor_event_reader.iter(&cursor_inputs) {
@@ -203,7 +205,7 @@ fn building(commands: &mut Commands,
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
             state.currently_building = true;
-            commands.spawn(SpriteSheetComponents {
+            state.cursor_follower = commands.spawn(SpriteSheetComponents {
                 sprite: TextureAtlasSprite::new(6),
                 texture_atlas: texture_atlases.get_handle(ta_id),
                 transform: Transform {
@@ -213,13 +215,31 @@ fn building(commands: &mut Commands,
                 },
                 ..Default::default()
             })
-            .with(CursorFollowing);
+            .with(CursorFollowing)
+            .current_entity();
         }
     }
 
-    // make the building indicator follow the mouse cursor
-    for (_, mut trans) in sprite_query.iter_mut() {
-        trans.translation = world_coords.extend(0.0);
+    if state.currently_building {
+        if mouse_input.pressed(MouseButton::Left) {
+            // check if cursor is inside of a moon
+            // TODO: use actual sprite size instead of magic number
+            for (_, mut sprite, trans) in moon_query.iter_mut() {
+                if trans.translation.x() - 128.0 * trans.scale.x() <= world_coords.x()
+                    && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
+                    && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
+                    && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y() {
+                    sprite.index = 4;
+                }
+            }
+            commands.despawn(state.cursor_follower.unwrap());
+            state.currently_building = false;
+        }
+
+        // make the building indicator follow the mouse cursor
+        for (_, mut trans) in sprite_query.iter_mut() {
+            trans.translation = world_coords.extend(0.0);
+        }
     }
 }
 
