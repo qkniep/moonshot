@@ -215,7 +215,7 @@ fn combat(
     keyboard_inputs: Res<Events<KeyboardInput>>,
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
-    mut query: Query<(&Rocket, Mut<Transform>)>,
+    mut query: Query<(Entity, &Rocket, Mut<Transform>)>,
 ) {
     let window = windows.get_primary().unwrap();
 
@@ -249,8 +249,12 @@ fn combat(
         }
     }
 
-    for (rocket, mut trans) in query.iter_mut() {
+    for (entity, rocket, mut trans) in query.iter_mut() {
         trans.translation += rocket.velocity.extend(0.0) * time.delta_seconds;
+        // despawn if out of bounds
+        if trans.translation.length() > 800.0 {
+            commands.despawn(entity);
+        }
     }
 }
 
