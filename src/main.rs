@@ -10,6 +10,7 @@ struct Planet;
 struct Moon {
     orbit_radius: f32,
     speed: f64,
+    mining: bool,
 }
 
 struct Rocket {
@@ -97,6 +98,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 300.0,
                     speed: 1.0,
+                    mining: false,
                 })
                 // Moon 2
                 .spawn(SpriteSheetComponents {
@@ -108,6 +110,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 500.0,
                     speed: 0.5,
+                    mining: false,
                 });
         });
 }
@@ -173,7 +176,7 @@ fn building(commands: &mut Commands,
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
-    mut moon_query: Query<(&Moon, Mut<TextureAtlasSprite>, &Transform)>,
+    mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &Transform)>,
     mut sprite_query: Query<(&CursorFollowing, Mut<Transform>)>,
 ) {
     for event in state.cursor_event_reader.iter(&cursor_inputs) {
@@ -224,12 +227,13 @@ fn building(commands: &mut Commands,
         if mouse_input.pressed(MouseButton::Left) {
             // check if cursor is inside of a moon
             // TODO: use actual sprite size instead of magic number
-            for (_, mut sprite, trans) in moon_query.iter_mut() {
+            for (mut moon, mut sprite, trans) in moon_query.iter_mut() {
                 if trans.translation.x() - 128.0 * trans.scale.x() <= world_coords.x()
                     && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
                     && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
                     && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y() {
                     sprite.index = 4;
+                    moon.mining = true;
                 }
             }
             commands.despawn(state.cursor_follower.unwrap());
@@ -305,12 +309,17 @@ fn combat(
 fn resource_mining(
     time: Res<Time>,
     mut resources: ResMut<PlayerResources>,
-    mut query: Query<(&mut Text, &ResourcesText)>,
+    moon_query: Query<&Moon>,
+    mut text_query: Query<(&mut Text, &ResourcesText)>,
 ) {
-    resources.pink += 1;
-    resources.green += 2;
+    for moon in moon_query.iter() {
+        if moon.mining {
+            resources.pink += 1;
+            //resources.green += 2;
+        }
+    }
 
-    for (mut text, _) in query.iter_mut() {
+    for (mut text, _) in text_query.iter_mut() {
         text.value = format!("{}, {}", resources.pink, resources.green);
     }
 }
