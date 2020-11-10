@@ -1,7 +1,10 @@
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{camera::{Camera, OrthographicProjection}, pass::ClearColor},
+    render::{
+        camera::{Camera, OrthographicProjection},
+        pass::ClearColor,
+    },
     ui::camera::UI_CAMERA,
 };
 
@@ -169,7 +172,8 @@ struct BuildingState {
 
 struct CursorFollowing;
 
-fn building(commands: &mut Commands,
+fn building(
+    commands: &mut Commands,
     mut state: Local<BuildingState>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
     mouse_input: Res<Input<MouseButton>>,
@@ -208,18 +212,19 @@ fn building(commands: &mut Commands,
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
             state.currently_building = true;
-            state.cursor_follower = commands.spawn(SpriteSheetComponents {
-                sprite: TextureAtlasSprite::new(6),
-                texture_atlas: texture_atlases.get_handle(ta_id),
-                transform: Transform {
-                    translation: world_coords.extend(0.0),
-                    rotation: Quat::default(),
-                    scale: Vec3::splat(0.25),
-                },
-                ..Default::default()
-            })
-            .with(CursorFollowing)
-            .current_entity();
+            state.cursor_follower = commands
+                .spawn(SpriteSheetComponents {
+                    sprite: TextureAtlasSprite::new(6),
+                    texture_atlas: texture_atlases.get_handle(ta_id),
+                    transform: Transform {
+                        translation: world_coords.extend(0.0),
+                        rotation: Quat::default(),
+                        scale: Vec3::splat(0.25),
+                    },
+                    ..Default::default()
+                })
+                .with(CursorFollowing)
+                .current_entity();
         }
     }
 
@@ -231,7 +236,8 @@ fn building(commands: &mut Commands,
                 if trans.translation.x() - 128.0 * trans.scale.x() <= world_coords.x()
                     && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
                     && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
-                    && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y() {
+                    && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y()
+                {
                     sprite.index = 4;
                     moon.mining = true;
                 }
