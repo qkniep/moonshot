@@ -26,7 +26,8 @@ struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(ClearColor(Color::hex("1A237E").unwrap()))
+        //app.add_resource(ClearColor(Color::hex("1A237E").unwrap()))
+        app.add_resource(ClearColor(Color::hex("22265A").unwrap()))
             .add_resource(PlayerResources { pink: 0, green: 0 })
             .add_startup_system(game_setup.system())
             .add_system(camera_motion.system())
@@ -152,17 +153,29 @@ fn kepler_motion(time: Res<Time>, mut query: Query<(&Moon, Mut<Transform>)>) {
     }
 }
 
+#[derive(Default)]
+struct BuildingState {
+    keyboard_event_reader: EventReader<KeyboardInput>,
+    cursor_event_reader: EventReader<CursorMoved>,
+    cursor_position: Vec2,
+    currently_building: bool,
+}
+
+struct CursorFollowing;
+
 fn building(commands: &mut Commands,
-    mut state: Local<EventState>,
+    mut state: Local<BuildingState>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
+    mut sprite_query: Query<(&CursorFollowing, Mut<Transform>)>,
 ) {
     for event in state.cursor_event_reader.iter(&cursor_inputs) {
         state.cursor_position = event.position;
     }
 
+    // get the releveant attributes of the 2D orth. projection
     let mut camera_pos = Vec2::splat(0.0);
     let mut camera_width = 0.0;
     let mut camera_height = 0.0;
@@ -182,11 +195,13 @@ fn building(commands: &mut Commands,
     let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
     let world_coords = camera_pos + screen_coords;
 
+    // change to building mode on button press
     let ta_id = texture_atlases.ids().next().unwrap();
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
+            state.currently_building = true;
             commands.spawn(SpriteSheetComponents {
-                sprite: TextureAtlasSprite::new(2),
+                sprite: TextureAtlasSprite::new(6),
                 texture_atlas: texture_atlases.get_handle(ta_id),
                 transform: Transform {
                     translation: world_coords.extend(0.0),
@@ -194,13 +209,19 @@ fn building(commands: &mut Commands,
                     scale: Vec3::splat(0.25),
                 },
                 ..Default::default()
-            });
+            })
+            .with(CursorFollowing);
         }
+    }
+
+    // make the building indicator follow the mouse cursor
+    for (_, mut trans) in sprite_query.iter_mut() {
+        trans.translation = world_coords.extend(0.0);
     }
 }
 
 #[derive(Default)]
-struct EventState {
+struct CombatState {
     keyboard_event_reader: EventReader<KeyboardInput>,
     cursor_event_reader: EventReader<CursorMoved>,
     cursor_position: Vec2,
@@ -209,7 +230,7 @@ struct EventState {
 /// System for shooting rockets in mouse cursor direction.
 fn combat(
     commands: &mut Commands,
-    mut state: Local<EventState>,
+    mut state: Local<CombatState>,
     time: Res<Time>,
     windows: Res<Windows>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
