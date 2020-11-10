@@ -1,7 +1,7 @@
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{camera::Camera, pass::ClearColor},
+    render::{camera::{Camera, OrthographicProjection}, pass::ClearColor},
     ui::camera::UI_CAMERA,
 };
 
@@ -26,9 +26,9 @@ struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
+        app.add_resource(ClearColor(Color::hex("1A237E").unwrap()))
             .add_resource(PlayerResources { pink: 0, green: 0 })
-            .add_startup_system(setup.system())
+            .add_startup_system(game_setup.system())
             .add_system(camera_motion.system())
             .add_system(kepler_motion.system())
             .add_system(building.system())
@@ -50,7 +50,7 @@ fn main() {
         .run();
 }
 
-fn setup(
+fn game_setup(
     commands: &mut Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -152,11 +152,55 @@ fn kepler_motion(time: Res<Time>, mut query: Query<(&Moon, Mut<Transform>)>) {
     }
 }
 
-fn building(time: Res<Time>) {
+fn building(commands: &mut Commands,
+    mut state: Local<EventState>,
+    keyboard_inputs: Res<Events<KeyboardInput>>,
+    cursor_inputs: Res<Events<CursorMoved>>,
+    texture_atlases: Res<Assets<TextureAtlas>>,
+    camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
+) {
+    for event in state.curosr_event_reader.iter(&cursor_inputs) {
+        state.cursor_position = event.position;
+    }
+
+    let mut camera_pos = Vec2::splat(0.0);
+    let mut camera_width = 0.0;
+    let mut camera_height = 0.0;
+    for (camera, trans, orth) in camera_query.iter() {
+        if camera.name == Some(UI_CAMERA.to_string()) {
+            continue;
+        }
+
+        camera_pos = Vec2::new(trans.translation.x(), trans.translation.y());
+        camera_width = orth.right - orth.left;
+        camera_height = orth.top - orth.bottom;
+    }
+
+    // convert cursor position to world coordinates
+    let x = state.cursor_position.x();
+    let y = state.cursor_position.y();
+    let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
+    let world_coords = camera_pos + screen_coords;
+
+    let ta_id = texture_atlases.ids().next().unwrap();
+    for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
+        if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
+            commands.spawn(SpriteSheetComponents {
+                sprite: TextureAtlasSprite::new(2),
+                texture_atlas: texture_atlases.get_handle(ta_id),
+                transform: Transform {
+                    translation: world_coords.extend(0.0),
+                    rotation: Quat::default(),
+                    scale: Vec3::splat(0.25),
+                },
+                ..Default::default()
+            });
+        }
+    }
 }
 
 #[derive(Default)]
-struct State {
+struct EventState {
     keyboard_event_reader: EventReader<KeyboardInput>,
     curosr_event_reader: EventReader<CursorMoved>,
     cursor_position: Vec2,
@@ -165,7 +209,7 @@ struct State {
 /// System for shooting rockets in mouse cursor direction.
 fn combat(
     commands: &mut Commands,
-    mut state: Local<State>,
+    mut state: Local<EventState>,
     time: Res<Time>,
     windows: Res<Windows>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
