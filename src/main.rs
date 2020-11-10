@@ -123,8 +123,7 @@ fn camera_motion(
             continue;
         }
 
-        let camera_speed = 500.0;
-        let ds = camera_speed * time.delta_seconds;
+        // determine direction based on keyboard input
         let mut direction = Vec3::splat(0.0);
         if keyboard_input.pressed(KeyCode::Up) {
             direction += Vec3::new(0.0, 1.0, 0.0)
@@ -138,6 +137,10 @@ fn camera_motion(
         if keyboard_input.pressed(KeyCode::Right) {
             direction += Vec3::new(1.0, 0.0, 0.0)
         }
+
+        // move the camera at constant speed in determined direction
+        let camera_speed = 500.0;
+        let ds = camera_speed * time.delta_seconds;
         if direction.length() > 0.0 {
             trans.translation += direction.normalize() * ds;
         }
