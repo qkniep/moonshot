@@ -4,57 +4,27 @@
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::camera::{Camera, OrthographicProjection},
-    ui::camera::UI_CAMERA,
 };
 
-use crate::components::Moon;
+use crate::{components::Moon, cursor_world_coords::*};
 
 #[derive(Default)]
 pub struct BuildingState {
     keyboard_event_reader: EventReader<KeyboardInput>,
-    cursor_event_reader: EventReader<CursorMoved>,
-    cursor_position: Vec2,
     cursor_follower: Option<Entity>,
     currently_building: bool,
 }
 
-pub struct CursorFollowing;
-
 pub fn building(
     commands: &mut Commands,
     mut state: Local<BuildingState>,
+    cursor_in_world: Res<CursorInWorld>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
     mouse_input: Res<Input<MouseButton>>,
-    cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
-    camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
     mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &GlobalTransform)>,
-    mut sprite_query: Query<(&CursorFollowing, Mut<Transform>)>,
 ) {
-    for event in state.cursor_event_reader.iter(&cursor_inputs) {
-        state.cursor_position = event.position;
-    }
-
-    // get the releveant attributes of the 2D orth. projection
-    let mut camera_pos = Vec2::splat(0.0);
-    let mut camera_width = 0.0;
-    let mut camera_height = 0.0;
-    for (camera, trans, orth) in camera_query.iter() {
-        if camera.name == Some(UI_CAMERA.to_string()) {
-            continue;
-        }
-
-        camera_pos = Vec2::new(trans.translation.x(), trans.translation.y());
-        camera_width = orth.right - orth.left;
-        camera_height = orth.top - orth.bottom;
-    }
-
-    // convert cursor position to world coordinates
-    let x = state.cursor_position.x();
-    let y = state.cursor_position.y();
-    let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
-    let world_coords = camera_pos + screen_coords;
+    let world_coords = cursor_in_world.position;
 
     // change to building mode on button press
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
@@ -92,11 +62,6 @@ pub fn building(
             }
             commands.despawn(state.cursor_follower.unwrap());
             state.currently_building = false;
-        }
-
-        // make the building indicator follow the mouse cursor
-        for (_, mut trans) in sprite_query.iter_mut() {
-            trans.translation = world_coords.extend(0.0);
         }
     }
 }

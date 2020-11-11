@@ -3,27 +3,28 @@
 
 mod building;
 mod components;
+mod cursor_world_coords;
 
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{
-        camera::{Camera, OrthographicProjection},
-        pass::ClearColor,
-    },
+    render::{camera::Camera, pass::ClearColor},
     ui::camera::UI_CAMERA,
 };
 
 use building::*;
 use components::*;
+use cursor_world_coords::*;
 
 struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_resource(ClearColor(Color::hex("22265A").unwrap()))
+            .add_resource(CursorInWorld::default())
             .add_resource(PlayerResources { pink: 0, green: 0 })
             .add_startup_system(game_setup.system())
+            .add_system(cursor_world_coords.system())
             .add_system(camera_motion.system())
             .add_system(kepler_motion.system())
             .add_system(building.system())
@@ -190,8 +191,6 @@ fn kepler_motion(time: Res<Time>, mut query: Query<(&Moon, Mut<Transform>)>) {
 #[derive(Default)]
 struct CombatState {
     keyboard_event_reader: EventReader<KeyboardInput>,
-    cursor_event_reader: EventReader<CursorMoved>,
-    cursor_position: Vec2,
 }
 
 /// System for shooting rockets in mouse cursor direction.
@@ -200,39 +199,13 @@ fn combat(
     mut state: Local<CombatState>,
     time: Res<Time>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
-    cursor_inputs: Res<Events<CursorMoved>>,
+    cursor_in_world: Res<CursorInWorld>,
     texture_atlases: Res<Assets<TextureAtlas>>,
-    camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
     mut query: Query<(Entity, &Rocket, Mut<Transform>)>,
 ) {
-    for event in state.cursor_event_reader.iter(&cursor_inputs) {
-        state.cursor_position = event.position;
-    }
-
-    // get the releveant attributes of the 2D orth. projection
-    let mut camera_pos = Vec2::splat(0.0);
-    let mut camera_width = 0.0;
-    let mut camera_height = 0.0;
-    for (camera, trans, orth) in camera_query.iter() {
-        if camera.name == Some(UI_CAMERA.to_string()) {
-            continue;
-        }
-
-        camera_pos = Vec2::new(trans.translation.x(), trans.translation.y());
-        camera_width = orth.right - orth.left;
-        camera_height = orth.top - orth.bottom;
-    }
-
-    // convert cursor position to world coordinates
-    let x = state.cursor_position.x();
-    let y = state.cursor_position.y();
-    let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
-    let world_coords = camera_pos + screen_coords;
-
-    // TODO: find better way of getting the SpriteSheet handle
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
-            let rocket_direction = world_coords.normalize();
+            let rocket_direction = cursor_in_world.position.normalize();
             let angle = rocket_direction.y().atan2(rocket_direction.x());
             commands
                 .spawn(SpriteSheetComponents {
