@@ -4,9 +4,7 @@
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{
-        camera::{Camera, OrthographicProjection},
-    },
+    render::camera::{Camera, OrthographicProjection},
     ui::camera::UI_CAMERA,
 };
 
@@ -31,7 +29,7 @@ pub fn building(
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
-    mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &Transform)>,
+    mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &GlobalTransform)>,
     mut sprite_query: Query<(&CursorFollowing, Mut<Transform>)>,
 ) {
     for event in state.cursor_event_reader.iter(&cursor_inputs) {
