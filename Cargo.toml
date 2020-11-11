@@ -1,8 +1,8 @@
 [package]
 name = "moonshot"
 version = "0.1.0"
-authors = ["Quentin Kniep <hello@quentinkniep.com>"]
+authors = ["Quentin M. Kniep <hello@quentinkniep.com>"]
 edition = "2018"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "80a04484735406a6c15987c4fa221a1f7353be6a" }
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "e769974d6ac28787a600e3cd56f5543e86401b9b" }
