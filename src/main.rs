@@ -7,7 +7,10 @@ mod components;
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{camera::Camera, pass::ClearColor},
+    render::{
+        camera::{Camera, OrthographicProjection},
+        pass::ClearColor,
+    },
     ui::camera::UI_CAMERA,
 };
 
@@ -196,23 +199,40 @@ fn combat(
     commands: &mut Commands,
     mut state: Local<CombatState>,
     time: Res<Time>,
-    windows: Res<Windows>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
     cursor_inputs: Res<Events<CursorMoved>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
+    camera_query: Query<(&Camera, &Transform, &OrthographicProjection)>,
     mut query: Query<(Entity, &Rocket, Mut<Transform>)>,
 ) {
-    let window = windows.get_primary().unwrap();
-
     for event in state.cursor_event_reader.iter(&cursor_inputs) {
-        state.cursor_position =
-            event.position - Vec2::new(window.width() as f32 / 2.0, window.height() as f32 / 2.0);
+        state.cursor_position = event.position;
     }
+
+    // get the releveant attributes of the 2D orth. projection
+    let mut camera_pos = Vec2::splat(0.0);
+    let mut camera_width = 0.0;
+    let mut camera_height = 0.0;
+    for (camera, trans, orth) in camera_query.iter() {
+        if camera.name == Some(UI_CAMERA.to_string()) {
+            continue;
+        }
+
+        camera_pos = Vec2::new(trans.translation.x(), trans.translation.y());
+        camera_width = orth.right - orth.left;
+        camera_height = orth.top - orth.bottom;
+    }
+
+    // convert cursor position to world coordinates
+    let x = state.cursor_position.x();
+    let y = state.cursor_position.y();
+    let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
+    let world_coords = camera_pos + screen_coords;
 
     // TODO: find better way of getting the SpriteSheet handle
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
-            let rocket_direction = state.cursor_position.normalize();
+            let rocket_direction = world_coords.normalize();
             let angle = rocket_direction.y().atan2(rocket_direction.x());
             commands
                 .spawn(SpriteSheetComponents {
