@@ -49,7 +49,7 @@ fn game_setup(
 ) {
     let texture_handle = asset_server.load("sprites/sprite_sheet.png");
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(256.0, 256.0), 4, 2);
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let texture_atlas_handle = texture_atlases.set("SPRITE_SHEET", texture_atlas);
     commands
         .spawn(Camera2dComponents::default())
         .spawn(UiCameraComponents::default())
@@ -210,7 +210,6 @@ fn combat(
     }
 
     // TODO: find better way of getting the SpriteSheet handle
-    let ta_id = texture_atlases.ids().next().unwrap();
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
             let rocket_direction = state.cursor_position.normalize();
@@ -218,8 +217,7 @@ fn combat(
             commands
                 .spawn(SpriteSheetComponents {
                     sprite: TextureAtlasSprite::new(7),
-                    //texture_atlas: texture_atlases.get_handle("sprites/sprite_sheet.png"),
-                    texture_atlas: texture_atlases.get_handle(ta_id),
+                    texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
                     transform: Transform {
                         translation: Vec3::splat(0.0),
                         rotation: Quat::from_rotation_z(angle),

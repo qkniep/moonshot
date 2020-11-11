@@ -57,14 +57,13 @@ pub fn building(
     let world_coords = camera_pos + screen_coords;
 
     // change to building mode on button press
-    let ta_id = texture_atlases.ids().next().unwrap();
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
             state.currently_building = true;
             state.cursor_follower = commands
                 .spawn(SpriteSheetComponents {
                     sprite: TextureAtlasSprite::new(6),
-                    texture_atlas: texture_atlases.get_handle(ta_id),
+                    texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
                     transform: Transform {
                         translation: world_coords.extend(0.0),
                         rotation: Quat::default(),
