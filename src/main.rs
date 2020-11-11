@@ -7,10 +7,7 @@ mod components;
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
-    render::{
-        camera::Camera,
-        pass::ClearColor,
-    },
+    render::{camera::Camera, pass::ClearColor},
     ui::camera::UI_CAMERA,
 };
 
@@ -72,11 +69,46 @@ fn game_setup(
             ..Default::default()
         })
         .with(ResourcesText)
-        // Planet
+        // Planet 1
         .spawn(SpriteSheetComponents {
             sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
             transform: Transform::from_scale(Vec3::splat(1.0)),
+            ..Default::default()
+        })
+        .with(Planet)
+        .with_children(|parent| {
+            parent
+                // Moon 1
+                .spawn(SpriteSheetComponents {
+                    sprite: TextureAtlasSprite::new(1),
+                    texture_atlas: texture_atlas_handle.clone(),
+                    transform: Transform::from_scale(Vec3::splat(0.5)),
+                    ..Default::default()
+                })
+                .with(Moon {
+                    orbit_radius: 300.0,
+                    speed: 1.0,
+                    mining: false,
+                })
+                // Moon 2
+                .spawn(SpriteSheetComponents {
+                    sprite: TextureAtlasSprite::new(1),
+                    texture_atlas: texture_atlas_handle.clone(),
+                    transform: Transform::from_scale(Vec3::splat(0.5)),
+                    ..Default::default()
+                })
+                .with(Moon {
+                    orbit_radius: 500.0,
+                    speed: 0.5,
+                    mining: false,
+                });
+        })
+        // Planet 2
+        .spawn(SpriteSheetComponents {
+            sprite: TextureAtlasSprite::new(0),
+            texture_atlas: texture_atlas_handle.clone(),
+            transform: Transform::from_translation(Vec3::splat(700.0)),
             ..Default::default()
         })
         .with(Planet)
@@ -181,7 +213,6 @@ fn combat(
     let ta_id = texture_atlases.ids().next().unwrap();
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
-            //let rocket_velocity = Vec3::new(300.0, 300.0, 0.0);
             let rocket_direction = state.cursor_position.normalize();
             let angle = rocket_direction.y().atan2(rocket_direction.x());
             commands
@@ -220,7 +251,6 @@ fn resource_mining(
     for moon in moon_query.iter() {
         if moon.mining {
             resources.pink += 1;
-            //resources.green += 2;
         }
     }
 
