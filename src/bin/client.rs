@@ -1,20 +1,60 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-use std::{io::{self, Write}, net::TcpStream};
-
 use bevy::prelude::Vec2;
+use bytes::BytesMut;
+use tokio::{
+    net::{tcp::OwnedReadHalf, TcpStream},
+    prelude::*,
+};
 
-use moonshot::PlayerActions;
+use moonshot::{PlayerAction, ServerTurn};
 
-fn main() -> io::Result<()> {
-    let mut stream = TcpStream::connect("127.0.0.1:8080")?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let stream = TcpStream::connect("127.0.0.1:7777").await?;
+    let (reader, mut writer) = stream.into_split();
 
-    let launch = PlayerActions::ShootRocket { pos: Vec2::splat(1.0), vel: Vec2::splat(99.9) };
+    tokio::spawn(client_handler(reader));
 
-    let serialized = bincode::serialize(&launch).unwrap();
-    stream.write(&[(serialized.len() / 256) as u8, (serialized.len() % 256) as u8])?;
-    stream.write_all(&serialized)?;
+    for i in 1..16u32 {
+        let launch = PlayerAction::ShootRocket {
+            pos: Vec2::splat(1.0 * i as f32),
+            vel: Vec2::splat(99.9),
+        };
+        let serialized = bincode::serialize(&launch).unwrap();
 
-    Ok(())
+        writer.write_u16(serialized.len() as u16).await?;
+        writer.write_all(&serialized).await?;
+    }
+    writer.flush().await?;
+
+    loop {}
+    //Ok(())
+}
+
+async fn client_handler(mut reader: OwnedReadHalf) {
+    let mut buf = BytesMut::with_capacity(65536);
+
+    'outer: loop {
+        match reader.read_buf(&mut buf).await {
+            Ok(n) if n == 0 => return, // socket closed
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Failed to read from socket: {:?}", e);
+                return;
+            }
+        };
+
+        while buf.len() >= 2 {
+            let size = buf[0] as usize * 256 + buf[1] as usize;
+            if buf.len() - 2 < size {
+                continue 'outer;
+            }
+
+            let bytes = buf.split_to(2 + size);
+            let turn = bincode::deserialize::<ServerTurn>(&bytes[2..]).unwrap();
+            println!("{:?}", turn);
+        }
+    }
 }

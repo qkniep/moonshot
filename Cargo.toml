@@ -7,5 +7,6 @@ edition = "2018"
 [dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy", rev = "55455853366fdbefc934a6030b3a391ee5575bc8" }
 bincode = "1"
+bytes = "0.6"
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "0.3", features = ["full"] }
