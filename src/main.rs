@@ -22,7 +22,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_resource(ClearColor(Color::hex("22265A").unwrap()))
             .add_resource(CursorInWorld::default())
-            .add_resource(PlayerResources { pink: 0, green: 0 })
+            .add_resource(PlayerResources { pink: 30, green: 0 })
             .add_startup_system(game_setup.system())
             .add_system(cursor_world_coords.system())
             .add_system(camera_motion.system())

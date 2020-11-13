@@ -6,7 +6,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::{components::Moon, cursor_world_coords::*};
+use crate::{components::Moon, cursor_world_coords::*, PlayerResources};
 
 #[derive(Clone, Copy)]
 pub enum BuildingType {
@@ -28,6 +28,7 @@ pub fn building(
     keyboard_inputs: Res<Events<KeyboardInput>>,
     mouse_input: Res<Input<MouseButton>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
+    mut resources: ResMut<PlayerResources>,
     mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &GlobalTransform)>,
 ) {
     let world_coords = cursor_in_world.position;
@@ -68,9 +69,11 @@ pub fn building(
                     && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
                     && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
                     && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y()
+                    && resources.pink >= building_cost(building)
                 {
                     sprite.index = building_moon_texture_index(building);
                     moon.building = Some(building);
+                    resources.pink -= building_cost(building);
                 }
             }
             commands.despawn(state.cursor_follower.unwrap());
@@ -90,5 +93,12 @@ fn building_moon_texture_index(building: BuildingType) -> u32 {
     match building {
         BuildingType::Mining => 4,
         BuildingType::Production => 8,
+    }
+}
+
+fn building_cost(building: BuildingType) -> u32 {
+    match building {
+        BuildingType::Mining => 20,
+        BuildingType::Production => 15,
     }
 }
