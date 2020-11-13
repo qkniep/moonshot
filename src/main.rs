@@ -241,7 +241,7 @@ struct ResourceMiningState {
 impl Default for ResourceMiningState {
     fn default() -> Self {
         Self {
-            timer: Timer::from_seconds(1.0, true)
+            timer: Timer::from_seconds(1.0, true),
         }
     }
 }
