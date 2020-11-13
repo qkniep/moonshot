@@ -5,7 +5,7 @@ authors = ["Quentin M. Kniep <hello@quentinkniep.com>"]
 edition = "2018"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "55455853366fdbefc934a6030b3a391ee5575bc8" }
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "43aac1a78480e196f9b8b29339a34d78bc44b663" }
 bincode = "1"
 bytes = "0.6"
 serde = { version = "1", features = ["derive"] }
