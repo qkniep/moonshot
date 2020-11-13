@@ -68,6 +68,7 @@ fn game_setup(
                 style: TextStyle {
                     font_size: 60.0,
                     color: Color::WHITE,
+                    alignment: TextAlignment::default(),
                 },
             },
             ..Default::default()
