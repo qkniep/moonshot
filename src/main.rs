@@ -234,15 +234,30 @@ fn combat(
     }
 }
 
+struct ResourceMiningState {
+    timer: Timer,
+}
+
+impl Default for ResourceMiningState {
+    fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(1.0, true)
+        }
+    }
+}
+
 fn resource_mining(
+    mut state: Local<ResourceMiningState>,
     time: Res<Time>,
     mut resources: ResMut<PlayerResources>,
     moon_query: Query<&Moon>,
     mut text_query: Query<(&mut Text, &ResourcesText)>,
 ) {
-    for moon in moon_query.iter() {
-        if moon.mining {
-            resources.pink += 1;
+    if state.timer.tick(time.delta_seconds).finished {
+        for moon in moon_query.iter() {
+            if moon.mining {
+                resources.pink += 1;
+            }
         }
     }
 
