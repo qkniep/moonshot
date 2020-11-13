@@ -3,12 +3,14 @@
 
 use bevy::prelude::*;
 
+use crate::building::*;
+
 pub struct Planet;
 
 pub struct Moon {
     pub orbit_radius: f32,
     pub speed: f64,
-    pub mining: bool,
+    pub building: Option<BuildingType>,
 }
 
 pub struct Rocket {

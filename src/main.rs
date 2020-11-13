@@ -52,7 +52,7 @@ fn game_setup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let texture_handle = asset_server.load("sprites/sprite_sheet.png");
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(256.0, 256.0), 4, 2);
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(256.0, 256.0), 4, 4);
     let texture_atlas_handle = texture_atlases.set("SPRITE_SHEET", texture_atlas);
     commands
         .spawn(Camera2dComponents::default())
@@ -94,7 +94,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 300.0,
                     speed: 1.0,
-                    mining: false,
+                    building: None,
                 })
                 // Moon 2
                 .spawn(SpriteSheetComponents {
@@ -106,7 +106,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 500.0,
                     speed: 0.5,
-                    mining: false,
+                    building: None,
                 });
         })
         // Planet 2
@@ -129,7 +129,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 300.0,
                     speed: 1.0,
-                    mining: false,
+                    building: None,
                 })
                 // Moon 2
                 .spawn(SpriteSheetComponents {
@@ -141,7 +141,7 @@ fn game_setup(
                 .with(Moon {
                     orbit_radius: 500.0,
                     speed: 0.5,
-                    mining: false,
+                    building: None,
                 });
         });
 }
@@ -255,7 +255,7 @@ fn resource_mining(
 ) {
     if state.timer.tick(time.delta_seconds).finished {
         for moon in moon_query.iter() {
-            if moon.mining {
+            if let Some(BuildingType::Mining) = moon.building {
                 resources.pink += 1;
             }
         }

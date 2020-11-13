@@ -8,11 +8,17 @@ use bevy::{
 
 use crate::{components::Moon, cursor_world_coords::*};
 
+#[derive(Clone, Copy)]
+pub enum BuildingType {
+    Mining,
+    Production,
+}
+
 #[derive(Default)]
 pub struct BuildingState {
     keyboard_event_reader: EventReader<KeyboardInput>,
     cursor_follower: Option<Entity>,
-    currently_building: bool,
+    currently_building: Option<BuildingType>,
 }
 
 pub fn building(
@@ -28,25 +34,32 @@ pub fn building(
 
     // change to building mode on button press
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
-        if event.key_code == Some(KeyCode::B) && event.state == ElementState::Pressed {
-            state.currently_building = true;
-            state.cursor_follower = commands
-                .spawn(SpriteSheetComponents {
-                    sprite: TextureAtlasSprite::new(6),
-                    texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
-                    transform: Transform {
-                        translation: world_coords.extend(0.0),
-                        rotation: Quat::default(),
-                        scale: Vec3::splat(0.25),
-                    },
-                    ..Default::default()
-                })
-                .with(CursorFollowing)
-                .current_entity();
+        if state.currently_building.is_none() && event.state == ElementState::Pressed {
+            state.currently_building = match event.key_code {
+                Some(KeyCode::B) => Some(BuildingType::Mining),
+                Some(KeyCode::R) => Some(BuildingType::Production),
+                _ => state.currently_building,
+            };
+
+            if let Some(building) = state.currently_building {
+                state.cursor_follower = commands
+                    .spawn(SpriteSheetComponents {
+                        sprite: building_cursor_texture(building),
+                        texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
+                        transform: Transform {
+                            translation: world_coords.extend(0.0),
+                            rotation: Quat::default(),
+                            scale: Vec3::splat(0.25),
+                        },
+                        ..Default::default()
+                    })
+                    .with(CursorFollowing)
+                    .current_entity();
+            }
         }
     }
 
-    if state.currently_building {
+    if let Some(building) = state.currently_building {
         if mouse_input.pressed(MouseButton::Left) {
             // check if cursor is inside of a moon
             // TODO: use actual sprite size instead of magic number
@@ -56,12 +69,26 @@ pub fn building(
                     && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
                     && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y()
                 {
-                    sprite.index = 4;
-                    moon.mining = true;
+                    sprite.index = building_moon_texture_index(building);
+                    moon.building = Some(building);
                 }
             }
             commands.despawn(state.cursor_follower.unwrap());
-            state.currently_building = false;
+            state.currently_building = None;
         }
+    }
+}
+
+fn building_cursor_texture(building: BuildingType) -> TextureAtlasSprite {
+    match building {
+        BuildingType::Mining => TextureAtlasSprite::new(6),
+        BuildingType::Production => TextureAtlasSprite::new(5),
+    }
+}
+
+fn building_moon_texture_index(building: BuildingType) -> u32 {
+    match building {
+        BuildingType::Mining => 4,
+        BuildingType::Production => 8,
     }
 }
