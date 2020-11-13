@@ -8,7 +8,7 @@ use bevy::{
 
 use crate::{components::Moon, cursor_world_coords::*, PlayerResources};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum BuildingType {
     Mining,
     Production,
