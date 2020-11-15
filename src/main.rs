@@ -15,6 +15,7 @@ use bevy::{
 use building::*;
 use components::*;
 use cursor_world_coords::*;
+use moonshot::NetworkPlugin;
 
 struct GamePlugin;
 
@@ -43,6 +44,7 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_plugin(GamePlugin)
+        .add_plugin(NetworkPlugin)
         .run();
 }
 
