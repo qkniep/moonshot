@@ -6,7 +6,8 @@ use bevy::{
     prelude::*,
 };
 
-use crate::{components::Moon, cursor_world_coords::*, PlayerResources};
+use crate::cursor_world_coords::*;
+use crate::components::{Moon, PlayerResources};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum BuildingType {

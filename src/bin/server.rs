@@ -13,7 +13,7 @@ use tokio::{
     sync::{mpsc, Mutex},
 };
 
-use moonshot::{PlayerAction, ServerTurn};
+use moonshot::network::{PlayerAction, ServerTurn};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

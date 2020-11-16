@@ -1,10 +1,6 @@
 // Copyright (C) 2020 Quentin M. Kniep <hello@quentinkniep.com>
 // Distributed under terms of the MIT license.
 
-mod building;
-mod components;
-mod cursor_world_coords;
-
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
@@ -12,10 +8,10 @@ use bevy::{
     ui::camera::UI_CAMERA,
 };
 
-use building::*;
-use components::*;
-use cursor_world_coords::*;
-use moonshot::{NetworkPlugin, PlayerAction, Transport};
+use moonshot::cursor_world_coords::*;
+use moonshot::building::*;
+use moonshot::components::*;
+use moonshot::network::{NetworkPlugin, PlayerAction, Transport};
 
 struct GamePlugin;
 
@@ -238,7 +234,7 @@ fn combat(
 
             let launch = PlayerAction::ShootRocket {
                 pos: rocket_position.truncate(),
-                vel: rocket_direction,
+                dir: rocket_direction,
             };
             let serialized = bincode::serialize(&launch).unwrap();
             transport.send(serialized);

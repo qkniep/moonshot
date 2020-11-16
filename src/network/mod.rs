@@ -5,20 +5,21 @@ mod time;
 
 use std::{
     collections::VecDeque,
-    io::{Read, Write},
+    io::Write,
     net::{SocketAddr, TcpStream},
 };
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::components::Rocket;
 use time::*;
 
 /// Player issued actions in the game which need to be processed through the server.
 #[derive(Deserialize, Serialize, Debug)]
 pub enum PlayerAction {
     Build(),
-    ShootRocket { pos: Vec2, vel: Vec2 },
+    ShootRocket { pos: Vec2, dir: Vec2 },
 }
 
 /// A single frame of the server's simulation.
@@ -60,7 +61,7 @@ impl Plugin for NetworkPlugin {
 
 pub struct Message {
     length: u16,
-    payload: Vec<u8>,
+    pub payload: Vec<u8>,
 }
 
 #[derive(Default)]
@@ -88,9 +89,6 @@ impl Transport {
 fn send_messages(mut transport: ResMut<Transport>, mut stream: ResMut<TcpStream>) {
     let messages = transport.drain_messages();
     for message in messages {
-        stream
-            .write_all(&[(message.length / 256) as u8, (message.length % 256) as u8])
-            .expect("Failed to send length of network message~");
         if let Err(e) = stream.write_all(&message.payload) {
             eprintln!("Failed to send network message: {}", e);
         }
@@ -98,14 +96,36 @@ fn send_messages(mut transport: ResMut<Transport>, mut stream: ResMut<TcpStream>
 }
 
 fn handle_messages(
+    commands: &mut Commands,
     mut stream: ResMut<TcpStream>,
     mut event_channel: ResMut<Events<NetworkSimulationEvent>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let peer_addr = stream.peer_addr().unwrap();
 
-    if let Ok(turn) = bincode::deserialize_from(&mut *stream) {
+    if let Ok(turn) = bincode::deserialize_from::<&mut TcpStream, ServerTurn>(&mut *stream) {
         println!("Received msg: {:?}", turn);
-        let x: ServerTurn = turn;
+        for action in turn.actions {
+            match action {
+                PlayerAction::ShootRocket { pos, dir } => {
+                    let angle = dir.y().atan2(dir.x());
+                    commands.spawn(SpriteSheetComponents {
+                        sprite: TextureAtlasSprite::new(7),
+                        texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
+                        transform: Transform {
+                            translation: pos.extend(0.0),
+                            rotation: Quat::from_rotation_z(angle),
+                            scale: Vec3::splat(0.25),
+                        },
+                        ..Default::default()
+                    })
+                    .with(Rocket {
+                        velocity: 300.0 * dir,
+                    });
+                }
+                _ => {}
+            }
+        }
         //event_channel.send(NetworkSimulationEvent::Message(peer_addr, msg_payload));
     }
 }
