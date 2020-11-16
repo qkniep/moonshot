@@ -109,7 +109,7 @@ fn handle_messages(
             match action {
                 PlayerAction::ShootRocket { pos, dir } => {
                     let angle = dir.y().atan2(dir.x());
-                    commands.spawn(SpriteSheetComponents {
+                    commands.spawn(SpriteSheetBundle {
                         sprite: TextureAtlasSprite::new(7),
                         texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
                         transform: Transform {

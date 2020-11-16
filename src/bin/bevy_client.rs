@@ -53,9 +53,9 @@ fn game_setup(
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(256.0, 256.0), 4, 4);
     let texture_atlas_handle = texture_atlases.set("SPRITE_SHEET", texture_atlas);
     commands
-        .spawn(Camera2dComponents::default())
-        .spawn(UiCameraComponents::default())
-        .spawn(TextComponents {
+        .spawn(Camera2dBundle::default())
+        .spawn(UiCameraBundle::default())
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexStart,
                 ..Default::default()
@@ -73,7 +73,7 @@ fn game_setup(
         })
         .with(ResourcesText)
         // Planet 1
-        .spawn(SpriteSheetComponents {
+        .spawn(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
             transform: Transform::from_scale(Vec3::splat(1.0)),
@@ -83,7 +83,7 @@ fn game_setup(
         .with_children(|parent| {
             parent
                 // Moon 1
-                .spawn(SpriteSheetComponents {
+                .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
                     transform: Transform::from_scale(Vec3::splat(0.5)),
@@ -95,7 +95,7 @@ fn game_setup(
                     building: None,
                 })
                 // Moon 2
-                .spawn(SpriteSheetComponents {
+                .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
                     transform: Transform::from_scale(Vec3::splat(0.5)),
@@ -108,7 +108,7 @@ fn game_setup(
                 });
         })
         // Planet 2
-        .spawn(SpriteSheetComponents {
+        .spawn(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
             transform: Transform::from_translation(Vec3::splat(700.0)),
@@ -118,7 +118,7 @@ fn game_setup(
         .with_children(|parent| {
             parent
                 // Moon 1
-                .spawn(SpriteSheetComponents {
+                .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
                     transform: Transform::from_scale(Vec3::splat(0.5)),
@@ -130,7 +130,7 @@ fn game_setup(
                     building: None,
                 })
                 // Moon 2
-                .spawn(SpriteSheetComponents {
+                .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
                     transform: Transform::from_scale(Vec3::splat(0.5)),
@@ -218,7 +218,7 @@ fn combat(
             let rocket_direction = cursor_in_world.position.normalize();
             let angle = rocket_direction.y().atan2(rocket_direction.x());
             commands
-                .spawn(SpriteSheetComponents {
+                .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(7),
                     texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
                     transform: Transform {

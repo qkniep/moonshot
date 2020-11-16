@@ -45,7 +45,7 @@ pub fn building(
 
             if let Some(building) = state.currently_building {
                 state.cursor_follower = commands
-                    .spawn(SpriteSheetComponents {
+                    .spawn(SpriteSheetBundle {
                         sprite: building_cursor_texture(building),
                         texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
                         transform: Transform {

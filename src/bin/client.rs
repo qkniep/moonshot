@@ -8,7 +8,7 @@ use tokio::{
     prelude::*,
 };
 
-use moonshot::{PlayerAction, ServerTurn};
+use moonshot::network::{PlayerAction, ServerTurn};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for i in 1..16u32 {
         let launch = PlayerAction::ShootRocket {
             pos: Vec2::splat(1.0 * i as f32),
-            vel: Vec2::splat(99.9),
+            dir: Vec2::splat(99.9),
         };
         let serialized = bincode::serialize(&launch).unwrap();
 
@@ -30,7 +30,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     writer.flush().await?;
 
     loop {}
-    //Ok(())
 }
 
 async fn client_handler(mut reader: OwnedReadHalf) {
