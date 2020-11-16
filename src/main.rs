@@ -15,7 +15,7 @@ use bevy::{
 use building::*;
 use components::*;
 use cursor_world_coords::*;
-use moonshot::NetworkPlugin;
+use moonshot::{NetworkPlugin, PlayerAction, Transport};
 
 struct GamePlugin;
 
@@ -206,6 +206,7 @@ fn combat(
     mouse_input: Res<Input<MouseButton>>,
     cursor_in_world: Res<CursorInWorld>,
     texture_atlases: Res<Assets<TextureAtlas>>,
+    mut transport: ResMut<Transport>,
     moon_query: Query<(Entity, &Moon, &GlobalTransform)>,
     mut rocket_query: Query<(Entity, &Rocket, Mut<Transform>)>,
 ) {
@@ -234,6 +235,13 @@ fn combat(
                 .with(Rocket {
                     velocity: 300.0 * rocket_direction,
                 });
+
+            let launch = PlayerAction::ShootRocket {
+                pos: rocket_position.truncate(),
+                vel: rocket_direction,
+            };
+            let serialized = bincode::serialize(&launch).unwrap();
+            transport.send(serialized);
         }
     }
 

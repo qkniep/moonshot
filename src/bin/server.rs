@@ -53,7 +53,7 @@ async fn game_loop(
                     serialized.len(),
                     serialized.as_slice()
                 );
-                player.write_u16(serialized.len() as u16).await.unwrap();
+                //player.write_u16(serialized.len() as u16).await.unwrap();
                 player.write_all(&serialized).await.unwrap();
                 player.flush().await.unwrap();
             }
