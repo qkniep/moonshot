@@ -29,9 +29,9 @@ impl Plugin for ServerPlugin {
         app.add_resource(Transport::default())
             //.add_resource(Events::<NetworkSimulationEvent>::default())
             //.add_resource(NetworkSimulationTime::default())
-            //.add_system(update_simulation_time.system())
-            .add_system(send_messages.system())
-            .add_system(handle_messages.system());
+            //.add_system(update_simulation_time)
+            .add_system(send_messages)
+            .add_system(handle_messages);
     }
 }
 
