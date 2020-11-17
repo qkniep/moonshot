@@ -4,12 +4,9 @@
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 
-use bevy::{
-    core::CorePlugin,
-    prelude::*,
-};
+use bevy::prelude::*;
 
-use moonshot::network::{PlayerAction, ServerTurn, Transport};
+use moonshot::network::{ServerTurn, Transport};
 
 fn main() {
     println!("Waiting for players...");
@@ -20,8 +17,7 @@ fn main() {
 
     App::build()
         .add_resource(players)
-        //.add_plugin(bevy::type_registry::TypeRegistryPlugin::default())
-        .add_plugins(DefaultPlugins)
+        .add_plugins(MinimalPlugins)
         .add_plugin(ServerPlugin)
         .run();
 }
@@ -30,9 +26,8 @@ struct ServerPlugin;
 
 impl Plugin for ServerPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app//.add_resource(players)
+        app.add_resource(Transport::default())
             //.add_resource(Events::<NetworkSimulationEvent>::default())
-            .add_resource(Transport::default())
             //.add_resource(NetworkSimulationTime::default())
             //.add_system(update_simulation_time.system())
             .add_system(send_messages.system())
@@ -43,7 +38,7 @@ impl Plugin for ServerPlugin {
 fn send_messages(mut transport: ResMut<Transport>, mut streams: ResMut<Vec<TcpStream>>) {
     let messages = transport.drain_messages();
     for message in messages {
-        for mut stream in streams.iter_mut() {
+        for stream in streams.iter_mut() {
             if let Err(e) = stream.write_all(&message.payload) {
                 eprintln!("Failed to send network message: {}", e);
             }
@@ -52,8 +47,8 @@ fn send_messages(mut transport: ResMut<Transport>, mut streams: ResMut<Vec<TcpSt
 }
 
 fn handle_messages(mut streams: ResMut<Vec<TcpStream>>, mut transport: ResMut<Transport>) {
-    for mut stream in streams.iter_mut() {
-        if let Ok(action) = bincode::deserialize_from::<&mut TcpStream, PlayerAction>(&mut *stream) {
+    for stream in streams.iter_mut() {
+        if let Ok(action) = bincode::deserialize_from(&mut *stream) {
             println!("Received from client: {:?}", action);
             let msg = ServerTurn::new(vec![action]);
             let serialized = bincode::serialize(&msg).unwrap();
