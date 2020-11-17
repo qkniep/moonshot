@@ -201,7 +201,6 @@ fn combat(
     keyboard_inputs: Res<Events<KeyboardInput>>,
     mouse_input: Res<Input<MouseButton>>,
     cursor_in_world: Res<CursorInWorld>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
     mut transport: ResMut<Transport>,
     moon_query: Query<(Entity, &Moon, &GlobalTransform)>,
     mut rocket_query: Query<(Entity, &Rocket, Mut<Transform>)>,
@@ -214,23 +213,7 @@ fn combat(
                     rocket_position = trans.translation;
                 }
             }
-
             let rocket_direction = cursor_in_world.position.normalize();
-            let angle = rocket_direction.y().atan2(rocket_direction.x());
-            commands
-                .spawn(SpriteSheetBundle {
-                    sprite: TextureAtlasSprite::new(7),
-                    texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),
-                    transform: Transform {
-                        translation: rocket_position,
-                        rotation: Quat::from_rotation_z(angle),
-                        scale: Vec3::splat(0.25),
-                    },
-                    ..Default::default()
-                })
-                .with(Rocket {
-                    velocity: 300.0 * rocket_direction,
-                });
 
             let launch = PlayerAction::ShootRocket {
                 pos: rocket_position.truncate(),
