@@ -99,7 +99,7 @@ fn handle_messages(
     commands: &mut Commands,
     mut stream: ResMut<TcpStream>,
     mut event_channel: ResMut<Events<NetworkSimulationEvent>>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    texture_atlases: Res<Assets<TextureAtlas>>,
 ) {
     let peer_addr = stream.peer_addr().unwrap();
 
@@ -108,7 +108,7 @@ fn handle_messages(
         for action in turn.actions {
             match action {
                 PlayerAction::ShootRocket { pos, dir } => {
-                    let angle = dir.y().atan2(dir.x());
+                    let angle = dir.y.atan2(dir.x);
                     commands.spawn(SpriteSheetBundle {
                         sprite: TextureAtlasSprite::new(7),
                         texture_atlas: texture_atlases.get_handle("SPRITE_SHEET"),

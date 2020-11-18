@@ -66,10 +66,10 @@ pub fn building(
             // check if cursor is inside of a moon
             // TODO: use actual sprite size instead of magic number
             for (mut moon, mut sprite, trans) in moon_query.iter_mut() {
-                if trans.translation.x() - 128.0 * trans.scale.x() <= world_coords.x()
-                    && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
-                    && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
-                    && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y()
+                if trans.translation.x - 128.0 * trans.scale.x <= world_coords.x
+                    && trans.translation.x + 128.0 * trans.scale.x >= world_coords.x
+                    && trans.translation.y - 128.0 * trans.scale.y <= world_coords.y
+                    && trans.translation.y + 128.0 * trans.scale.y >= world_coords.y
                     && resources.pink >= building_cost(building)
                 {
                     sprite.index = building_moon_texture_index(building);

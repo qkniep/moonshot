@@ -38,14 +38,14 @@ pub fn cursor_world_coords(
                 continue;
             }
 
-            camera_pos = Vec2::new(trans.translation.x(), trans.translation.y());
+            camera_pos = Vec2::new(trans.translation.x, trans.translation.y);
             camera_width = orth.right - orth.left;
             camera_height = orth.top - orth.bottom;
         }
 
         // convert cursor position to world coordinates
-        let x = cursor_position.x();
-        let y = cursor_position.y();
+        let x = cursor_position.x;
+        let y = cursor_position.y;
         let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);
         let world_coords = camera_pos + screen_coords;
 

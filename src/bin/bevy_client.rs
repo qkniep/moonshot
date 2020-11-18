@@ -229,10 +229,10 @@ fn combat(
         // check if cursor is inside of a moon
         // TODO: use actual sprite size instead of magic number
         for (entity, moon, trans) in moon_query.iter() {
-            if trans.translation.x() - 128.0 * trans.scale.x() <= world_coords.x()
-                && trans.translation.x() + 128.0 * trans.scale.x() >= world_coords.x()
-                && trans.translation.y() - 128.0 * trans.scale.y() <= world_coords.y()
-                && trans.translation.y() + 128.0 * trans.scale.y() >= world_coords.y()
+            if trans.translation.x - 128.0 * trans.scale.x <= world_coords.x
+                && trans.translation.x + 128.0 * trans.scale.x >= world_coords.x
+                && trans.translation.y - 128.0 * trans.scale.y <= world_coords.y
+                && trans.translation.y + 128.0 * trans.scale.y >= world_coords.y
                 && moon.building == Some(BuildingType::Production)
             {
                 //sprite.index = ...;
