@@ -2,16 +2,17 @@
 // Distributed under terms of the MIT license.
 
 use bevy::{
-    input::{keyboard::KeyboardInput, ElementState, Input},
+    input::Input,
     prelude::*,
     render::{camera::Camera, pass::ClearColor},
     ui::camera::UI_CAMERA,
 };
 
-use moonshot::cursor_world_coords::*;
 use moonshot::building::*;
+use moonshot::combat::*;
 use moonshot::components::*;
-use moonshot::network::{NetworkPlugin, PlayerAction, Transport};
+use moonshot::cursor_world_coords::*;
+use moonshot::network::NetworkPlugin;
 
 struct GamePlugin;
 
@@ -184,70 +185,6 @@ fn kepler_motion(time: Res<Time>, mut query: Query<(&Moon, Mut<Transform>)>) {
         let x = moon.orbit_radius * ds.cos() as f32;
         let y = moon.orbit_radius * ds.sin() as f32;
         trans.translation = Vec3::new(x, y, 0.0);
-    }
-}
-
-#[derive(Default)]
-struct CombatState {
-    keyboard_event_reader: EventReader<KeyboardInput>,
-    current_rocket_base: Option<Entity>,
-}
-
-/// System for shooting rockets in mouse cursor direction.
-fn combat(
-    commands: &mut Commands,
-    mut state: Local<CombatState>,
-    time: Res<Time>,
-    keyboard_inputs: Res<Events<KeyboardInput>>,
-    mouse_input: Res<Input<MouseButton>>,
-    cursor_in_world: Res<CursorInWorld>,
-    mut transport: ResMut<Transport>,
-    moon_query: Query<(Entity, &Moon, &GlobalTransform)>,
-    mut rocket_query: Query<(Entity, &Rocket, Mut<Transform>)>,
-) {
-    for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
-        if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
-            let mut rocket_position = Vec3::splat(0.0);
-            for (entity, _, trans) in moon_query.iter() {
-                if state.current_rocket_base == Some(entity) {
-                    rocket_position = trans.translation;
-                }
-            }
-            let rocket_direction = cursor_in_world.position.normalize();
-
-            let launch = PlayerAction::ShootRocket {
-                pos: rocket_position.truncate(),
-                dir: rocket_direction,
-            };
-            let serialized = bincode::serialize(&launch).unwrap();
-            transport.send(serialized);
-        }
-    }
-
-    let world_coords = cursor_in_world.position;
-    if mouse_input.pressed(MouseButton::Left) {
-        // check if cursor is inside of a moon
-        // TODO: use actual sprite size instead of magic number
-        for (entity, moon, trans) in moon_query.iter() {
-            if trans.translation.x - 128.0 * trans.scale.x <= world_coords.x
-                && trans.translation.x + 128.0 * trans.scale.x >= world_coords.x
-                && trans.translation.y - 128.0 * trans.scale.y <= world_coords.y
-                && trans.translation.y + 128.0 * trans.scale.y >= world_coords.y
-                && moon.building == Some(BuildingType::Production)
-            {
-                //sprite.index = ...;
-                state.current_rocket_base = Some(entity);
-            }
-        }
-    }
-
-    // move rockets according to their current velocity
-    for (entity, rocket, mut trans) in rocket_query.iter_mut() {
-        trans.translation += rocket.velocity.extend(0.0) * time.delta_seconds;
-        // despawn if out of bounds
-        if trans.translation.length() > 800.0 {
-            commands.despawn(entity);
-        }
     }
 }
 

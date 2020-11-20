@@ -2,6 +2,7 @@
 // Distributed under terms of the MIT license.
 
 pub mod building;
+pub mod combat;
 pub mod components;
 pub mod cursor_world_coords;
 pub mod network;
