@@ -24,6 +24,7 @@ pub fn combat(
     time: Res<Time>,
     keyboard_inputs: Res<Events<KeyboardInput>>,
     mouse_input: Res<Input<MouseButton>>,
+    mut resources: ResMut<PlayerResources>,
     cursor_in_world: Res<CursorInWorld>,
     mut transport: ResMut<Transport>,
     moon_query: Query<(Entity, &Moon, &GlobalTransform)>,
@@ -31,6 +32,11 @@ pub fn combat(
 ) {
     for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
         if event.key_code == Some(KeyCode::A) && event.state == ElementState::Pressed {
+            if resources.pink < 3 || state.current_rocket_base.is_none() {
+                continue;
+            }
+            resources.pink -= 3;
+
             let mut rocket_position = Vec3::splat(0.0);
             for (entity, _, trans) in moon_query.iter() {
                 if state.current_rocket_base == Some(entity) {
