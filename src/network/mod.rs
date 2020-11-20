@@ -12,13 +12,14 @@ use std::{
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::components::Rocket;
-use time::*;
+use crate::building::*;
+use crate::components::{Moon, Rocket};
+use self::time::*;
 
 /// Player issued actions in the game which need to be processed through the server.
 #[derive(Deserialize, Serialize, Debug)]
 pub enum PlayerAction {
-    Build(),
+    Build { building: BuildingType, moon: u32 },
     ShootRocket { pos: Vec2, dir: Vec2 },
 }
 
@@ -99,6 +100,7 @@ fn handle_messages(
     commands: &mut Commands,
     mut stream: ResMut<TcpStream>,
     mut event_channel: ResMut<Events<NetworkSimulationEvent>>,
+    mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>)>,
     texture_atlases: Res<Assets<TextureAtlas>>,
 ) {
     let peer_addr = stream.peer_addr().unwrap();
@@ -107,6 +109,11 @@ fn handle_messages(
         println!("Received msg: {:?}", turn);
         for action in turn.actions {
             match action {
+                PlayerAction::Build { building, moon } => {
+                    let (mut moon, mut sprite) = moon_query.get_mut(Entity::new(moon)).unwrap();
+                    sprite.index = building_moon_texture_index(building);
+                    moon.building = Some(building);
+                },
                 PlayerAction::ShootRocket { pos, dir } => {
                     let angle = dir.y.atan2(dir.x);
                     commands.spawn(SpriteSheetBundle {

@@ -5,11 +5,13 @@ use bevy::{
     input::{keyboard::KeyboardInput, ElementState, Input},
     prelude::*,
 };
+use serde::{Deserialize, Serialize};
 
-use crate::cursor_world_coords::*;
 use crate::components::{Moon, PlayerResources};
+use crate::cursor_world_coords::*;
+use crate::network::{PlayerAction, Transport};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BuildingType {
     Mining,
     Production,
@@ -30,7 +32,8 @@ pub fn building(
     mouse_input: Res<Input<MouseButton>>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     mut resources: ResMut<PlayerResources>,
-    mut moon_query: Query<(Mut<Moon>, Mut<TextureAtlasSprite>, &GlobalTransform)>,
+    mut transport: ResMut<Transport>,
+    mut moon_query: Query<(Entity, &Moon, &GlobalTransform)>,
 ) {
     let world_coords = cursor_in_world.position;
 
@@ -65,15 +68,19 @@ pub fn building(
         if mouse_input.pressed(MouseButton::Left) {
             // check if cursor is inside of a moon
             // TODO: use actual sprite size instead of magic number
-            for (mut moon, mut sprite, trans) in moon_query.iter_mut() {
+            for (entity, _, trans) in moon_query.iter_mut() {
                 if trans.translation.x - 128.0 * trans.scale.x <= world_coords.x
                     && trans.translation.x + 128.0 * trans.scale.x >= world_coords.x
                     && trans.translation.y - 128.0 * trans.scale.y <= world_coords.y
                     && trans.translation.y + 128.0 * trans.scale.y >= world_coords.y
                     && resources.pink >= building_cost(building)
                 {
-                    sprite.index = building_moon_texture_index(building);
-                    moon.building = Some(building);
+                    let build = PlayerAction::Build {
+                        building,
+                        moon: entity.id(),
+                    };
+                    let serialized = bincode::serialize(&build).unwrap();
+                    transport.send(serialized);
                     resources.pink -= building_cost(building);
                 }
             }
@@ -90,7 +97,7 @@ fn building_cursor_texture(building: BuildingType) -> TextureAtlasSprite {
     }
 }
 
-fn building_moon_texture_index(building: BuildingType) -> u32 {
+pub fn building_moon_texture_index(building: BuildingType) -> u32 {
     match building {
         BuildingType::Mining => 9,
         BuildingType::Production => 8,
