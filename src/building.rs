@@ -85,14 +85,14 @@ pub fn building(
 
 fn building_cursor_texture(building: BuildingType) -> TextureAtlasSprite {
     match building {
-        BuildingType::Mining => TextureAtlasSprite::new(6),
-        BuildingType::Production => TextureAtlasSprite::new(5),
+        BuildingType::Mining => TextureAtlasSprite::new(5),
+        BuildingType::Production => TextureAtlasSprite::new(12),
     }
 }
 
 fn building_moon_texture_index(building: BuildingType) -> u32 {
     match building {
-        BuildingType::Mining => 4,
+        BuildingType::Mining => 9,
         BuildingType::Production => 8,
     }
 }
