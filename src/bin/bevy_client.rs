@@ -3,6 +3,7 @@
 
 use bevy::{
     input::Input,
+    log::{Level, LogSettings},
     prelude::*,
     render::{camera::Camera, pass::ClearColor},
     ui::camera::UI_CAMERA,
@@ -37,6 +38,10 @@ fn main() {
             title: "Moonshot!".to_string(),
             width: 1920,
             height: 1080,
+            ..Default::default()
+        })
+        .add_resource(LogSettings {
+            level: Level::DEBUG,
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)

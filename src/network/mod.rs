@@ -91,7 +91,7 @@ fn send_messages(mut transport: ResMut<Transport>, mut stream: ResMut<TcpStream>
     let messages = transport.drain_messages();
     for message in messages {
         if let Err(e) = stream.write_all(&message.payload) {
-            eprintln!("Failed to send network message: {}", e);
+            error!("Failed to send network message: {}", e);
         }
     }
 }
@@ -106,7 +106,7 @@ fn handle_messages(
     let peer_addr = stream.peer_addr().unwrap();
 
     if let Ok(turn) = bincode::deserialize_from::<&mut TcpStream, ServerTurn>(&mut *stream) {
-        println!("Received msg: {:?}", turn);
+        trace!("Received msg: {:?}", turn);
         for action in turn.actions {
             match action {
                 PlayerAction::Build { building, moon } => {

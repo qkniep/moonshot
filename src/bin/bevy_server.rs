@@ -4,20 +4,22 @@
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 
-use bevy::prelude::*;
+use bevy::{prelude::*, log::LogPlugin};
 
 use moonshot::network::{ServerTurn, Transport};
 
 fn main() {
-    println!("Waiting for players...");
+    info!("Starting listening socket");
     let mut players = Vec::new();
     let mut listener = TcpListener::bind("127.0.0.1:7777").unwrap();
+    info!("Started listening on {:?}, waiting for players...", listener.local_addr());
     handle_connects(&mut listener, &mut players, 2);
-    println!("Found 2 players!");
+    info!("Found 2 players!");
 
     App::build()
         .add_resource(players)
         .add_plugins(MinimalPlugins)
+        .add_plugin(LogPlugin)
         .add_plugin(ServerPlugin)
         .run();
 }
@@ -40,7 +42,7 @@ fn send_messages(mut transport: ResMut<Transport>, mut streams: ResMut<Vec<TcpSt
     for message in messages {
         for stream in streams.iter_mut() {
             if let Err(e) = stream.write_all(&message.payload) {
-                eprintln!("Failed to send network message: {}", e);
+                error!("Failed to send network message: {}", e);
             }
         }
     }
@@ -49,7 +51,7 @@ fn send_messages(mut transport: ResMut<Transport>, mut streams: ResMut<Vec<TcpSt
 fn handle_messages(mut streams: ResMut<Vec<TcpStream>>, mut transport: ResMut<Transport>) {
     for stream in streams.iter_mut() {
         if let Ok(action) = bincode::deserialize_from(&mut *stream) {
-            println!("Received from client: {:?}", action);
+            trace!("Received from client: {:?}", action);
             let msg = ServerTurn::new(vec![action]);
             let serialized = bincode::serialize(&msg).unwrap();
             transport.send(serialized);
@@ -60,7 +62,7 @@ fn handle_messages(mut streams: ResMut<Vec<TcpStream>>, mut transport: ResMut<Tr
 fn handle_connects(listener: &mut TcpListener, streams: &mut Vec<TcpStream>, max_conns: usize) {
     for conn in listener.incoming() {
         if let Ok(stream) = conn {
-            println!("Accepted connection!");
+            info!("Accepted a new connection");
             stream.set_nonblocking(true).unwrap();
             streams.push(stream);
             if streams.len() >= max_conns {

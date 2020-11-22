@@ -51,6 +51,7 @@ pub fn cursor_world_coords(
 
         // assign the new world coords to the gloabl resource
         cursor_in_world.position = world_coords;
+        debug!("Cursor move in world, new position: {}", cursor_in_world.position);
 
         // move CursorFollowing entities to mouse cursor
         for (_, mut trans) in cursorfollowing_query.iter_mut() {
