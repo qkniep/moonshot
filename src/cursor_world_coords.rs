@@ -43,7 +43,7 @@ pub fn cursor_world_coords(
             camera_height = orth.top - orth.bottom;
         }
 
-        // convert cursor position to world coordinates
+        // convert cursor position in window to world coordinates
         let x = cursor_position.x;
         let y = cursor_position.y;
         let screen_coords = Vec2::new(x - camera_width / 2.0, y - camera_height / 2.0);

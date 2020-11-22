@@ -37,13 +37,11 @@ pub fn combat(
             }
             resources.pink -= 3;
 
-            let mut rocket_position = Vec3::splat(0.0);
-            for (entity, _, trans) in moon_query.iter() {
-                if state.current_rocket_base == Some(entity) {
-                    rocket_position = trans.translation;
-                }
-            }
-            let rocket_direction = cursor_in_world.position.normalize();
+            let base_moon = state.current_rocket_base.unwrap();
+            let (_, _, trans) = moon_query.get(base_moon).unwrap();
+            let rocket_position = trans.translation;
+            let rocket_direction =
+                (cursor_in_world.position - trans.translation.truncate()).normalize();
 
             let launch = PlayerAction::ShootRocket {
                 pos: rocket_position.truncate(),
