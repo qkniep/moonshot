@@ -13,13 +13,14 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::building::*;
-use crate::components::{Moon, Rocket};
+use crate::components::{Aura, Moon, Rocket};
 use self::time::*;
 
 /// Player issued actions in the game which need to be processed through the server.
 #[derive(Deserialize, Serialize, Debug)]
 pub enum PlayerAction {
     Build { building: BuildingType, moon: u32 },
+    ChangeAura { aura: Option<Aura>, planet: u32 },
     ShootRocket { pos: Vec2, dir: Vec2 },
 }
 

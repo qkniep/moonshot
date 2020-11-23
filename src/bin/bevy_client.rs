@@ -2,7 +2,7 @@
 // Distributed under terms of the MIT license.
 
 use bevy::{
-    input::Input,
+    input::{keyboard::KeyboardInput, ElementState, Input},
     log::{Level, LogSettings},
     prelude::*,
     render::{camera::Camera, pass::ClearColor},
@@ -13,7 +13,7 @@ use moonshot::building::*;
 use moonshot::combat::*;
 use moonshot::components::*;
 use moonshot::cursor_world_coords::*;
-use moonshot::network::NetworkPlugin;
+use moonshot::network::{NetworkPlugin, PlayerAction, Transport};
 
 struct GamePlugin;
 
@@ -27,6 +27,7 @@ impl Plugin for GamePlugin {
             .add_system(camera_motion)
             .add_system(kepler_motion)
             .add_system(building)
+            .add_system(planet_auras)
             .add_system(combat)
             .add_system(resource_mining);
     }
@@ -85,7 +86,7 @@ fn game_setup(
             transform: Transform::from_scale(Vec3::splat(1.0)),
             ..Default::default()
         })
-        .with(Planet)
+        .with(Planet::default())
         .with_children(|parent| {
             parent
                 // Moon 1
@@ -120,7 +121,7 @@ fn game_setup(
             transform: Transform::from_translation(Vec3::splat(700.0)),
             ..Default::default()
         })
-        .with(Planet)
+        .with(Planet::default())
         .with_children(|parent| {
             parent
                 // Moon 1
@@ -222,5 +223,63 @@ fn resource_mining(
 
     for (mut text, _) in text_query.iter_mut() {
         text.value = format!("{}, {}", resources.pink, resources.green);
+    }
+}
+
+#[derive(Default)]
+pub struct PlanetAuraState {
+    keyboard_event_reader: EventReader<KeyboardInput>,
+    current_planet: Option<Entity>,
+}
+
+pub fn planet_auras(
+    mut state: Local<PlanetAuraState>,
+    cursor_in_world: Res<CursorInWorld>,
+    keyboard_inputs: Res<Events<KeyboardInput>>,
+    mouse_input: Res<Input<MouseButton>>,
+    mut resources: ResMut<PlayerResources>,
+    mut transport: ResMut<Transport>,
+    mut planet_query: Query<(Entity, Mut<Planet>, &GlobalTransform)>,
+) {
+    let world_coords = cursor_in_world.position;
+
+    // change to building mode on button press
+    for event in state.keyboard_event_reader.iter(&keyboard_inputs) {
+        if let Some(entity) = state.current_planet {
+            if event.state == ElementState::Pressed {
+                let (_, mut planet, _) = planet_query.get_mut(entity).unwrap();
+                planet.current_aura = match event.key_code {
+                    Some(KeyCode::P) => Some(Aura::ProductionSpeed),
+                    Some(KeyCode::R) => Some(Aura::RocketSpeed),
+                    Some(KeyCode::D) => Some(Aura::RocketDamage),
+                    Some(KeyCode::M) => Some(Aura::MoonSpeed),
+                    Some(KeyCode::S) => Some(Aura::Shield),
+                    _ => planet.current_aura,
+                };
+                let aura_change = PlayerAction::ChangeAura {
+                    aura: planet.current_aura,
+                    planet: entity.id(),
+                };
+                let serialized = bincode::serialize(&aura_change).unwrap();
+                transport.send(serialized);
+                //resources.pink -= building_cost(building);
+                state.current_planet = None;
+            }
+        }
+    }
+
+    if mouse_input.pressed(MouseButton::Left) {
+        // check if cursor is inside of a moon
+        // TODO: use actual sprite size instead of magic number
+        for (entity, _, trans) in planet_query.iter_mut() {
+            if trans.translation.x - 256.0 * trans.scale.x <= world_coords.x
+                && trans.translation.x + 256.0 * trans.scale.x >= world_coords.x
+                && trans.translation.y - 256.0 * trans.scale.y <= world_coords.y
+                && trans.translation.y + 256.0 * trans.scale.y >= world_coords.y
+                //&& resources.pink >= building_cost(building)
+            {
+                state.current_planet = Some(entity);
+            }
+        }
     }
 }

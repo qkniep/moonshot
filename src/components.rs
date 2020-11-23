@@ -2,10 +2,23 @@
 // Distributed under terms of the MIT license.
 
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::building::*;
 
-pub struct Planet;
+#[derive(Default)]
+pub struct Planet {
+    pub current_aura: Option<Aura>,
+}
+
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Aura {
+    MoonSpeed,
+    ProductionSpeed,
+    RocketDamage,
+    RocketSpeed,
+    Shield,
+}
 
 pub struct Moon {
     pub orbit_radius: f32,
