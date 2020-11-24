@@ -272,10 +272,10 @@ pub fn planet_auras(
         // check if cursor is inside of a moon
         // TODO: use actual sprite size instead of magic number
         for (entity, _, trans) in planet_query.iter_mut() {
-            if trans.translation.x - 256.0 * trans.scale.x <= world_coords.x
-                && trans.translation.x + 256.0 * trans.scale.x >= world_coords.x
-                && trans.translation.y - 256.0 * trans.scale.y <= world_coords.y
-                && trans.translation.y + 256.0 * trans.scale.y >= world_coords.y
+            if trans.translation.x - 128.0 * trans.scale.x <= world_coords.x
+                && trans.translation.x + 128.0 * trans.scale.x >= world_coords.x
+                && trans.translation.y - 128.0 * trans.scale.y <= world_coords.y
+                && trans.translation.y + 128.0 * trans.scale.y >= world_coords.y
                 //&& resources.pink >= building_cost(building)
             {
                 state.current_planet = Some(entity);

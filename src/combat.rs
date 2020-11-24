@@ -73,7 +73,7 @@ pub fn combat(
     for (entity, rocket, mut trans) in rocket_query.iter_mut() {
         trans.translation += rocket.velocity.extend(0.0) * time.delta_seconds;
         // despawn if out of bounds
-        if trans.translation.length() > 800.0 {
+        if trans.translation.length() > 2000.0 {
             commands.despawn(entity);
         }
     }
