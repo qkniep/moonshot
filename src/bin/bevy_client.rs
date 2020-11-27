@@ -213,7 +213,7 @@ fn resource_mining(
     moon_query: Query<&Moon>,
     mut text_query: Query<(&mut Text, &ResourcesText)>,
 ) {
-    if state.timer.tick(time.delta_seconds).finished {
+    if state.timer.tick(time.delta_seconds).just_finished() {
         for moon in moon_query.iter() {
             if let Some(BuildingType::Mining) = moon.building {
                 resources.pink += 1;
